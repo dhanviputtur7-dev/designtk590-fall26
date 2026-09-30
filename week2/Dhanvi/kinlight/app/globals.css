@@ -1,0 +1,349 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f5ed;
+  --foreground: #2f352e;
+  --gold: #ead17c;
+  --muted: #72766e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: monospace;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.page {
+  min-height: 100vh;
+}
+
+.page-content {
+  width: 92%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3rem 0;
+}
+
+.brand-title {
+  margin: 0 0 1rem;
+  color: #26352c;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  font-weight: 900;
+  letter-spacing: -0.07em;
+  line-height: 1;
+}
+
+.intro-question {
+  margin: 0 0 2rem;
+  color: #62675e;
+  font-size: clamp(1.3rem, 2.4vw, 2rem);
+}
+
+.save-error,
+.form-error {
+  padding: 0.7rem 1rem;
+  border: 1px solid #d8c9dc;
+  border-radius: 12px;
+  background: #f0e8f2;
+  color: #715d75;
+}
+
+.form-error {
+  margin-top: 0.75rem;
+}
+
+.add-person {
+  margin: 2rem 0 3rem;
+}
+
+/* Form fields */
+
+.field {
+  flex: 1;
+  min-width: 140px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d5cfbd;
+  border-radius: 999px;
+  background: #fffdf7;
+  color: var(--foreground);
+  font: inherit;
+}
+
+.field:focus {
+  outline: 2px solid #8eb6c8;
+}
+
+.date-field {
+  display: flex;
+  flex: 1;
+  min-width: 180px;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: #656a61;
+  font-size: 0.85rem;
+}
+
+.date-field .field {
+  width: 100%;
+}
+
+/* Buttons */
+
+.btn {
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #c7b987;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: rgba(234, 209, 124, 0.2);
+}
+
+.btn-primary {
+  border-color: #dfc66e;
+  background: var(--gold);
+  color: #3d392a;
+  font-weight: 700;
+}
+
+.btn-primary:hover {
+  background: #f0dfa0;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  color: var(--muted);
+}
+
+/* People and their village blobs */
+
+.village {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  align-items: start;
+  gap: 2rem 2.5rem;
+}
+
+.island {
+  display: flex;
+  min-height: 290px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 2rem;
+  color: var(--foreground);
+  text-align: center;
+  transition: background 0.8s, box-shadow 0.8s, border-color 0.8s;
+}
+
+/* Stagger the blobs on wider screens. */
+
+@media (min-width: 700px) {
+  .village > div:nth-child(3n + 2) {
+    transform: translateY(24px);
+  }
+
+  .village > div:nth-child(3n + 3) {
+    transform: translateY(45px);
+  }
+}
+
+.house-icon {
+  margin-bottom: 0.3rem;
+  font-size: 3rem;
+}
+
+.person-name {
+  font-size: 1.4rem;
+}
+
+.person-detail {
+  color: #656a61;
+  font-size: 0.95rem;
+}
+
+.person-time {
+  margin-top: 0.3rem;
+  font-size: 0.95rem;
+}
+
+.person-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+.check-in-success {
+  margin: 0.5rem 0 0;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background: #e0eff0;
+  color: #4f7880;
+  font-weight: 700;
+}
+
+/* Add a person */
+
+.island-add {
+  border: 1px dashed #c3bdad;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.island-add:hover {
+  border-color: #8eb6c8;
+  color: #527d83;
+}
+
+.add-icon {
+  font-size: 2.5rem;
+}
+
+/* Suggested message */
+
+.message-box {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #d5cfbd;
+  border-radius: 16px;
+  background: #fffdf7;
+  text-align: center;
+}
+
+.message-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Group people into larger place bubbles */
+
+.places-section {
+  margin-top: 4rem;
+  text-align: center;
+}
+
+.places-button {
+  padding: 0.8rem 1.4rem;
+}
+
+.places-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.place-village {
+  padding: 1.5rem;
+  border: 1px solid #c8b6cf;
+  border-radius: 42% 58% 50% 50% / 50% 45% 55% 50%;
+  background: rgba(185, 163, 190, 0.16);
+}
+
+.place-village h2 {
+  margin: 0;
+  color: #26352c;
+}
+
+.place-village > p {
+  margin: 0.35rem 0 1rem;
+  color: var(--muted);
+}
+
+.place-people {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.place-person {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.place-dot {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 1rem;
+  border: 1px solid rgba(47, 53, 46, 0.18);
+  border-radius: 50%;
+}
+
+.place-mood {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Gentle movement for glowing houses */
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.025);
+  }
+}
+
+.breathing {
+  animation: breathe 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathing {
+    animation: none;
+  }
+}
+
+/* Smaller screen layout */
+
+@media (max-width: 600px) {
+  .page-content {
+    width: 90%;
+    padding: 2rem 0;
+  }
+
+  .village,
+  .places-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .village > div:nth-child(n) {
+    transform: none;
+  }
+
+  .brand-title {
+    font-size: 3.2rem;
+  }
+}
