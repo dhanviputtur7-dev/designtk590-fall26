@@ -24,3 +24,106 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+/* ---------- Kinlight ---------- */
+
+.field {
+  flex: 1;
+  min-width: 140px;
+  padding: 0.6rem 0.9rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid #444;
+  border-radius: 999px;
+  color: inherit;
+  font: inherit;
+  color-scheme: dark;
+}
+.field:focus {
+  outline: none;
+  border-color: #ffc45c;
+}
+
+.btn {
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 196, 92, 0.5);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.btn:hover {
+  background: rgba(255, 196, 92, 0.15);
+}
+.btn-primary {
+  background: #ffc45c;
+  border-color: #ffc45c;
+  color: #1a1200;
+  font-weight: 600;
+}
+.btn-primary:hover {
+  background: #ffd37f;
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.btn-ghost {
+  border-color: transparent;
+  color: #999;
+}
+
+/* the village grid and the blob-shaped islands */
+.village {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  align-items: start;
+  gap: 1.5rem;
+}
+.island {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 270px;
+  padding: 2.25rem 2rem;
+  text-align: center;
+  transition: background 0.8s, box-shadow 0.8s, border-color 0.8s;
+}
+.island-add {
+  border: 1px dashed #555;
+  background: transparent;
+  color: #999;
+  font: inherit;
+  cursor: pointer;
+}
+.island-add:hover {
+  border-color: #ffc45c;
+  color: #ffc45c;
+}
+
+/* lit houses slowly "breathe" */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+.breathing {
+  animation: breathe 5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .breathing { animation: none; }
+}
+
+.message-box {
+  margin-top: 0.75rem;
+  padding: 0.9rem;
+  border: 1px dashed #555;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+.message-box p {
+  margin-bottom: 0.6rem;
+}
