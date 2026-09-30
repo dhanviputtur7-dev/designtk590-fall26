@@ -1,177 +1,102 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { geocodeCity } from "./lib/time";
-import LocalTime from "./components/LocalTime";
+import { useState, useEffect, useRef } from "react";
+import AddPersonForm from "./components/AddPersonForm";
+import VillageIsland from "./components/VillageIsland";
+import VillageHealth from "./components/VillageHealth";
+import {
+  daysSince,
+  overdueRatio,
+  villageHealth,
+  randomMessage,
+  loadPeople,
+  savePeople,
+  lightLevel,
+  moodLabel,
+} from "./lib/village";
+import type { Person } from "./lib/village";
 
-type Frequency = "daily" | "weekly" | "biweekly" | "monthly";
-
-type Person = {
-  id: string;
-  name: string;
-  relationship: string;
-  frequency: Frequency;
-  lastCheckIn: string; // ISO date string
-  checkInHistory: string[]; // ISO dates of every check-in ever
-  city?: string;
-  timezone?: string;
-};
-
-const FREQUENCY_DAYS: Record<Frequency, number> = {
-  daily: 1,
-  weekly: 7,
-  biweekly: 14,
-  monthly: 30,
-};
-
-const MESSAGE_TEMPLATES = [
-  "Hey! It's been a bit — how have you been?",
-  "Thinking of you, wanted to check in!",
-  "Hi! What's new with you lately?",
-  "Been meaning to reach out — how's everything going?",
-  "Hey stranger, catch me up on your life!",
+const pastelColors = [
+  "#66C5CC",
+  "#F6CF71",
+  "#F89C74",
+  "#DCB0F2",
+  "#87C55F",
+  "#9EB9F3",
+  "#FE88B1",
+  "#C9DB74",
+  "#8BE0A4",
+  "#B497E7",
+  "#B3B3B3",
 ];
-
-// shared styles so the JSX below stays short
-const inputStyle = {
-  flex: 1,
-  minWidth: 120,
-  padding: "0.5rem",
-  background: "transparent",
-  border: "1px solid #444",
-  borderRadius: 6,
-  color: "inherit",
-} as const;
-
-const smallButton = {
-  padding: "0.4rem 0.8rem",
-  borderRadius: 6,
-  border: "1px solid #666",
-  background: "transparent",
-  color: "inherit",
-  cursor: "pointer",
-} as const;
-
-const ghostButton = {
-  padding: "0.4rem 0.6rem",
-  borderRadius: 6,
-  border: "none",
-  background: "transparent",
-  color: "#999",
-  cursor: "pointer",
-} as const;
-
-function daysSince(dateStr: string) {
-  const then = new Date(dateStr).getTime();
-  const now = Date.now();
-  return Math.floor((now - then) / (1000 * 60 * 60 * 24));
-}
-
-function overdueRatio(person: Person) {
-  const elapsed = daysSince(person.lastCheckIn);
-  const target = FREQUENCY_DAYS[person.frequency];
-  return elapsed / target;
-}
-
-function houseGlow(ratio: number) {
-  if (ratio < 0.5) return { emoji: "🏠", label: "glowing" };
-  if (ratio < 1) return { emoji: "🏡", label: "warm" };
-  if (ratio < 1.5) return { emoji: "🏚️", label: "dimming" };
-  return { emoji: "🌑", label: "dark" };
-}
-
-function randomMessage(name: string) {
-  const base =
-    MESSAGE_TEMPLATES[Math.floor(Math.random() * MESSAGE_TEMPLATES.length)];
-  return base.replace("Hey!", `Hey ${name}!`).replace("Hi!", `Hi ${name}!`);
-}
 
 export default function HomePage() {
   const [people, setPeople] = useState<Person[]>([]);
-  const [name, setName] = useState("");
-  const [relationship, setRelationship] = useState("");
-  const [city, setCity] = useState("");
-  const [frequency, setFrequency] = useState<Frequency>("weekly");
   const [isLoaded, setIsLoaded] = useState(false);
-  const [adding, setAdding] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
   const [messagePersonId, setMessagePersonId] = useState<string | null>(null);
   const [suggestedMessage, setSuggestedMessage] = useState("");
+  const [checkedInPersonId, setCheckedInPersonId] = useState<string | null>(
+    null
+  );
+  const [showPlaces, setShowPlaces] = useState(false);
+  const [, setTick] = useState(0);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("kinlight:people");
-    if (saved) setPeople(JSON.parse(saved));
+    setPeople(loadPeople());
     setIsLoaded(true);
   }, []);
 
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem("kinlight:people", JSON.stringify(people));
-    }
+    if (!isLoaded) return;
+    setSaveFailed(!savePeople(people));
   }, [people, isLoaded]);
 
-  async function addPerson(e: React.FormEvent) {
-    e.preventDefault();
-    if (!name.trim()) return;
+  useEffect(() => {
+    const timer = setInterval(() => setTick((tick) => tick + 1), 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-    setFormError(null);
-    setAdding(true);
-
-    let cityName: string | undefined;
-    let timezone: string | undefined;
-
-    try {
-      if (city.trim()) {
-        const place = await geocodeCity(city.trim());
-        if (!place) {
-          setFormError("We couldn't find that city. Try a nearby larger one.");
-          return;
-        }
-        cityName = place.name;
-        timezone = place.timezone;
-      }
-    } catch {
-      setFormError("Couldn't look up that city. Try again.");
-      return;
-    } finally {
-      setAdding(false);
-    }
-
-    const newPerson: Person = {
-      id: crypto.randomUUID(),
-      name: name.trim(),
-      relationship: relationship.trim() || "friend",
-      frequency,
-      lastCheckIn: new Date().toISOString(),
-      checkInHistory: [],
-      city: cityName,
-      timezone,
-    };
-
-    setPeople((prev) => [...prev, newPerson]);
-    setName("");
-    setRelationship("");
-    setCity("");
-    setFrequency("weekly");
+  function addPerson(person: Person) {
+    setPeople((previousPeople) => [...previousPeople, person]);
   }
 
   function checkIn(id: string) {
     const now = new Date().toISOString();
-    setPeople((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? { ...p, lastCheckIn: now, checkInHistory: [...p.checkInHistory, now] }
-          : p
+
+    setPeople((previousPeople) =>
+      previousPeople.map((person) =>
+        person.id === id
+          ? {
+              ...person,
+              lastCheckIn: now,
+              checkInHistory: [...person.checkInHistory, now],
+            }
+          : person
       )
     );
+
+    setCheckedInPersonId(id);
+
+    window.setTimeout(() => {
+      setCheckedInPersonId(null);
+    }, 2500);
   }
 
-  function removePerson(id: string) {
-    setPeople((prev) => prev.filter((p) => p.id !== id));
-    if (messagePersonId === id) setMessagePersonId(null);
+  function removePerson(person: Person) {
+    if (!window.confirm(`Remove ${person.name} from your village?`)) return;
+
+    setPeople((previousPeople) =>
+      previousPeople.filter((savedPerson) => savedPerson.id !== person.id)
+    );
+
+    if (messagePersonId === person.id) {
+      setMessagePersonId(null);
+    }
   }
 
-  function openMessageSuggestion(person: Person) {
+  function openMessage(person: Person) {
     setMessagePersonId(person.id);
     setSuggestedMessage(randomMessage(person.name));
   }
@@ -180,185 +105,178 @@ export default function HomePage() {
     navigator.clipboard?.writeText(suggestedMessage);
   }
 
-  // sort most overdue first
+  function focusAddForm() {
+    nameInputRef.current?.focus();
+    nameInputRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
+
   const sortedPeople = [...people].sort(
-    (a, b) => overdueRatio(b) - overdueRatio(a)
+    (personA, personB) => overdueRatio(personB) - overdueRatio(personA)
   );
 
-  // playful tracker: how many check-ins happened in the last 7 days
-  const checkInsThisWeek = people.reduce((count, p) => {
-    const recent = p.checkInHistory.filter((d) => daysSince(d) < 7).length;
-    return count + recent;
-  }, 0);
+  const health = villageHealth(people);
+
+  const checkInsThisWeek = people.reduce(
+    (count, person) =>
+      count +
+      person.checkInHistory.filter((date) => daysSince(date) < 7).length,
+    0
+  );
+
+  const peopleByPlace: Record<string, Person[]> = {};
+
+  people.forEach((person) => {
+    const place = person.city || "Place not set";
+
+    if (!peopleByPlace[place]) {
+      peopleByPlace[place] = [];
+    }
+
+    peopleByPlace[place].push(person);
+  });
 
   return (
-    <main style={{ maxWidth: 640, margin: "0 auto", padding: "3rem 1.5rem" }}>
-      <h1 style={{ fontSize: "1.75rem", marginBottom: "0.25rem" }}>
-        🏠 Kinlight
-      </h1>
-      <p style={{ opacity: 0.7, marginBottom: "0.5rem" }}>
-        Life gets busy, and the people you love most are often the easiest to
-        lose track of.
-      </p>
+    <div
+      className="page"
+      style={{
+        background: `radial-gradient(ellipse at top, rgba(219, 183, 93, ${health * 0.16}), transparent 65%), #f7f5ed`,
+      }}
+    >
+      <main className="page-content">
+        <h1 className="brand-title">Kinlight</h1>
 
-      {people.length > 0 && (
-        <p style={{ opacity: 0.6, fontSize: "0.9rem", marginBottom: "2rem" }}>
-          ✨ You've checked in with {checkInsThisWeek}{" "}
-          {checkInsThisWeek === 1 ? "person" : "people"} this week
+        <p className="intro-question">
+          Who would you like to check in on?
         </p>
-      )}
 
-      <form
-        onSubmit={addPerson}
-        style={{
-          display: "flex",
-          gap: "0.5rem",
-          marginBottom: "2.5rem",
-          flexWrap: "wrap",
-        }}
-      >
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
-          style={inputStyle}
-        />
-        <input
-          value={relationship}
-          onChange={(e) => setRelationship(e.target.value)}
-          placeholder="Relationship"
-          style={inputStyle}
-        />
-        <input
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          placeholder="City, Country (e.g. Mangalore, India)"
-          style={inputStyle}
-        />
-        <select
-          value={frequency}
-          onChange={(e) => setFrequency(e.target.value as Frequency)}
-          style={{ ...inputStyle, flex: "none", minWidth: 0 }}
-        >
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="biweekly">Bi-weekly</option>
-          <option value="monthly">Monthly</option>
-        </select>
-        <button
-          type="submit"
-          disabled={adding}
-          style={{
-            padding: "0.5rem 1rem",
-            borderRadius: 6,
-            border: "1px solid #666",
-            background: "#fff",
-            color: "#000",
-            cursor: "pointer",
-          }}
-        >
-          {adding ? "Adding..." : "Add"}
-        </button>
-      </form>
+        {saveFailed && (
+          <p className="save-error">
+            Your browser couldn&apos;t save your village. Changes may be lost
+            when you close this tab.
+          </p>
+        )}
 
-      {formError && (
-        <p style={{ color: "#e07a7a", marginTop: "-1.5rem", marginBottom: "1.5rem" }}>
-          {formError}
-        </p>
-      )}
+        {people.length > 0 && (
+          <VillageHealth
+            health={health}
+            checkInsThisWeek={checkInsThisWeek}
+          />
+        )}
 
-      {sortedPeople.length === 0 ? (
-        <p style={{ opacity: 0.6 }}>Your village is empty. Add someone above.</p>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          {sortedPeople.map((person) => {
-            const ratio = overdueRatio(person);
-            const glow = houseGlow(ratio);
-            const days = daysSince(person.lastCheckIn);
-
-            return (
-              <div key={person.id}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "1rem",
-                    padding: "1rem",
-                    border: "1px solid #333",
-                    borderRadius: 10,
-                  }}
-                >
-                  <span style={{ fontSize: "2rem" }}>{glow.emoji}</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>{person.name}</div>
-                    <div style={{ fontSize: "0.85rem", opacity: 0.7 }}>
-                      {person.relationship} · {days}{" "}
-                      {days === 1 ? "day" : "days"} since last check-in ·{" "}
-                      {glow.label}
-                    </div>
-
-                    {person.timezone && person.city && (
-                      <div style={{ fontSize: "0.85rem", marginTop: "0.25rem" }}>
-                        <LocalTime timezone={person.timezone} city={person.city} />
-                      </div>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => openMessageSuggestion(person)}
-                    style={smallButton}
-                  >
-                    💬
-                  </button>
-                  <button onClick={() => checkIn(person.id)} style={smallButton}>
-                    Check in
-                  </button>
-                  <button
-                    onClick={() => removePerson(person.id)}
-                    style={ghostButton}
-                    aria-label={`Remove ${person.name}`}
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                {messagePersonId === person.id && (
-                  <div
-                    style={{
-                      marginTop: "0.5rem",
-                      padding: "0.75rem",
-                      border: "1px dashed #555",
-                      borderRadius: 8,
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    <p style={{ marginBottom: "0.5rem" }}>{suggestedMessage}</p>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <button
-                        onClick={copyMessage}
-                        style={{ ...smallButton, padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}
-                      >
-                        Copy
-                      </button>
-                      <button
-                        onClick={() => openMessageSuggestion(person)}
-                        style={{ ...smallButton, padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}
-                      >
-                        Try another
-                      </button>
-                      <button
-                        onClick={() => setMessagePersonId(null)}
-                        style={{ ...ghostButton, padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}
-                      >
-                        Close
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        <div className="add-person">
+          <AddPersonForm
+            onAdd={addPerson}
+            nameInputRef={nameInputRef}
+          />
         </div>
-      )}
-    </main>
+
+        <div className="village">
+          {sortedPeople.map((person) => (
+            <div key={person.id}>
+              <VillageIsland
+                person={person}
+                isCheckedIn={checkedInPersonId === person.id}
+                onCheckIn={() => checkIn(person.id)}
+                onMessage={() => openMessage(person)}
+                onRemove={() => removePerson(person)}
+              />
+
+              {messagePersonId === person.id && (
+                <div className="message-box">
+                  <p>{suggestedMessage}</p>
+
+                  <div className="message-actions">
+                    <button className="btn" onClick={copyMessage}>
+                      Copy
+                    </button>
+
+                    <button
+                      className="btn"
+                      onClick={() => openMessage(person)}
+                    >
+                      Try another
+                    </button>
+
+                    <button
+                      className="btn btn-ghost"
+                      onClick={() => setMessagePersonId(null)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+
+          <button
+            className="island island-add"
+            style={{
+              borderRadius: "48% 52% 44% 56% / 56% 44% 56% 44%",
+            }}
+            onClick={focusAddForm}
+          >
+            <span className="add-icon">＋</span>
+            {people.length === 0
+              ? "Your village is empty. Add your first person."
+              : "Add someone"}
+          </button>
+        </div>
+
+        {people.length > 0 && (
+          <section className="places-section">
+            <button
+              className="btn places-button"
+              onClick={() => setShowPlaces(!showPlaces)}
+              aria-expanded={showPlaces}
+            >
+              {showPlaces ? "Hide places" : "Explore by place"}
+            </button>
+
+            {showPlaces && (
+              <div className="places-grid">
+                {Object.entries(peopleByPlace).map(([place, placePeople]) => (
+                  <section className="place-village" key={place}>
+                    <h2>{place}</h2>
+                    <p>
+                      {placePeople.length}{" "}
+                      {placePeople.length === 1 ? "person" : "people"}
+                    </p>
+
+                    <div className="place-people">
+                      {placePeople.map((person) => {
+                        const light = lightLevel(person);
+                        const colorIndex =
+                          person.id.charCodeAt(0) % pastelColors.length;
+                        const color = pastelColors[colorIndex];
+
+                        return (
+                          <div className="place-person" key={person.id}>
+                            <span
+                              className="place-dot"
+                              style={{
+                                backgroundColor: color,
+                                opacity: 0.3 + light * 0.7,
+                              }}
+                            />
+                            <span>{person.name}</span>
+                            <span className="place-mood">
+                              {moodLabel(light)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+      </main>
+    </div>
   );
 }
