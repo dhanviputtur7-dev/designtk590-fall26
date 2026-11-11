@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kinlight
 
-## Getting Started
+Kinlight helps people with busy schedules remember to check in with family and friends, especially people who live far away. Its village theme makes keeping in touch feel like less of a chore and personal.
 
-First, run the development server:
+**Live app:** https://kinlight-ten.vercel.app/  
+**GitHub repository:** https://github.com/dhanviputtur7-dev/designtk590-fall26
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Audience
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Kinlight is for people who want to stay connected with family and friends but find it hard keep track of everyone.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Problem
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Busy schedules make it easy to lose track of when you last reached out to someone. Calendar reminders can feel like chores, and relying on memory does not always work.
 
-## Learn More
+## Primary user flow
 
-To learn more about Next.js, take a look at the following resources:
+1. Add someone’s name, relationship, last-contact date, and preferred check-in frequency. You can also add their city.
+2. See contacts as colorful house bubbles. The glow dims as time passes compared with the check-in frequency you chose.
+3. Choose someone to contact and view a suggested message. Copy it or try another suggestion.
+4. After reaching out, select **Check in**. Kinlight updates the last-contact date and briefly confirms the check-in.
+5. Optionally, explore contacts grouped by place.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Technical stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Next.js
+- React
+- TypeScript
+- CSS
+- Browser `localStorage` for saving contacts
 
-## Deploy on Vercel
+## APIs
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+My app uses the Open-Meteo Geocoding API to look up a city and its time zone. It uses the Time.Now Timezone API to show the local time for a contact’s location. The browser provides a local-time fallback if the time service is unavailable.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+These APIs do not require an API key. Kinlight’s message ideas come from built-in templates; the app does not send messages.
+
+## Run locally
+
+You’ll need Node.js and npm.
+
+1. Clone the repository:
+
+   ```bash
+   git clone ADD_YOUR_REPOSITORY_URL

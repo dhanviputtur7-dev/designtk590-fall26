@@ -103,11 +103,11 @@ export function loadPeople(): Person[] {
       frequency: FREQUENCY_DAYS[p.frequency] ? p.frequency : "weekly",
     }));
   } catch {
-    // the data looks damaged: keep a copy so nothing is lost for good
+    
     try {
       if (raw) localStorage.setItem(BACKUP_KEY, raw);
     } catch {
-      /* nothing more we can do */
+      
     }
     return [];
   }
