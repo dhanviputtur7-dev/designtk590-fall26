@@ -5,10 +5,11 @@ export type Person = {
   name: string;
   relationship: string;
   frequency: Frequency;
-  lastCheckIn: string; // ISO date string
-  checkInHistory: string[]; // ISO date of every check-in
+  lastCheckIn: string;
+  checkInHistory: string[];
   city?: string;
   timezone?: string;
+  birthday?: string; // Stored as MM-DD, without the birth year
 };
 
 export const FREQUENCY_DAYS: Record<Frequency, number> = {
@@ -18,38 +19,72 @@ export const FREQUENCY_DAYS: Record<Frequency, number> = {
   monthly: 30,
 };
 
-const MESSAGE_TEMPLATES = [
-  "Hey! It's been a bit — how have you been?",
-  "Thinking of you, wanted to check in!",
-  "Hi! What's new with you lately?",
-  "Been meaning to reach out — how's everything going?",
-  "Hey stranger, catch me up on your life!",
-];
-
-export function randomMessage(name: string) {
-  const base =
-    MESSAGE_TEMPLATES[Math.floor(Math.random() * MESSAGE_TEMPLATES.length)];
-  return base.replace("Hey!", `Hey ${name}!`).replace("Hi!", `Hi ${name}!`);
-}
-
-// ---------- light and darkness ----------
-
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
-// whole days, for showing to the user
 export function daysSince(dateStr: string) {
   return Math.floor((Date.now() - new Date(dateStr).getTime()) / MS_PER_DAY);
 }
 
-// 0 = just checked in, 1 = check-in is due, 2 = twice as overdue as it should be
+export function daysUntilBirthday(
+  birthday: string,
+  fromDate = new Date()
+): number | null {
+  const [month, day] = birthday.split("-").map(Number);
+
+  if (
+    !month ||
+    !day ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > new Date(2000, month, 0).getDate()
+  ) {
+    return null;
+  }
+
+  const year = fromDate.getFullYear();
+  const today = Date.UTC(year, fromDate.getMonth(), fromDate.getDate());
+
+  function birthdayDate(targetYear: number) {
+    const lastDayOfMonth = new Date(targetYear, month, 0).getDate();
+
+    return Date.UTC(
+      targetYear,
+      month - 1,
+      Math.min(day, lastDayOfMonth)
+    );
+  }
+
+  let nextBirthday = birthdayDate(year);
+
+  if (nextBirthday < today) {
+    nextBirthday = birthdayDate(year + 1);
+  }
+
+  return Math.round((nextBirthday - today) / MS_PER_DAY);
+}
+
+export function formatBirthday(birthday: string) {
+  const [month, day] = birthday.split("-").map(Number);
+
+  if (!month || !day) return birthday;
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: "long",
+    day: "numeric",
+  }).format(new Date(2000, month - 1, day));
+}
+
 export function overdueRatio(person: Person) {
-  const days = (Date.now() - new Date(person.lastCheckIn).getTime()) / MS_PER_DAY;
+  const days =
+    (Date.now() - new Date(person.lastCheckIn).getTime()) / MS_PER_DAY;
+
   return days / FREQUENCY_DAYS[person.frequency];
 }
 
-// 1 = fully lit, about 0.5 when due, 0.1 = dark (never fully invisible)
 export function lightLevel(person: Person) {
   const light = 1 - overdueRatio(person) / 2;
+
   return Math.min(1, Math.max(0.1, light));
 }
 
@@ -57,17 +92,17 @@ export function moodLabel(light: number) {
   if (light > 0.75) return "glowing";
   if (light > 0.5) return "warm";
   if (light > 0.25) return "dimming";
+
   return "dark";
 }
 
-// average light of every house: how "alive" the village is (0 to 1)
 export function villageHealth(people: Person[]) {
   if (people.length === 0) return 0;
-  const total = people.reduce((sum, p) => sum + lightLevel(p), 0);
+
+  const total = people.reduce((sum, person) => sum + lightLevel(person), 0);
+
   return total / people.length;
 }
-
-// ---------- organic shapes ----------
 
 const BLOB_SHAPES = [
   "58% 42% 47% 53% / 45% 55% 45% 55%",
@@ -77,43 +112,51 @@ const BLOB_SHAPES = [
   "45% 55% 55% 45% / 50% 62% 38% 50%",
 ];
 
-// the same person always gets the same shape
 export function blobShape(id: string) {
   let sum = 0;
-  for (const ch of id) sum += ch.charCodeAt(0);
+
+  for (const character of id) {
+    sum += character.charCodeAt(0);
+  }
+
   return BLOB_SHAPES[sum % BLOB_SHAPES.length];
 }
-
-// ---------- saving and loading (localStorage) ----------
 
 const STORAGE_KEY = "kinlight:people";
 const BACKUP_KEY = "kinlight:people:backup";
 
 export function loadPeople(): Person[] {
   let raw: string | null = null;
+
   try {
     raw = localStorage.getItem(STORAGE_KEY);
+
     if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) throw new Error("saved data is not a list");
-    // fill in anything older saves might be missing
-    return (parsed as Person[]).map((p) => ({
-      ...p,
-      checkInHistory: p.checkInHistory ?? [],
-      frequency: FREQUENCY_DAYS[p.frequency] ? p.frequency : "weekly",
+
+    const parsed: unknown = JSON.parse(raw);
+
+    if (!Array.isArray(parsed)) {
+      throw new Error("Saved data is not a list.");
+    }
+
+    return (parsed as Person[]).map((person) => ({
+      ...person,
+      checkInHistory: person.checkInHistory ?? [],
+      frequency: FREQUENCY_DAYS[person.frequency] ? person.frequency : "weekly",
     }));
   } catch {
-    
     try {
-      if (raw) localStorage.setItem(BACKUP_KEY, raw);
+      if (raw) {
+        localStorage.setItem(BACKUP_KEY, raw);
+      }
     } catch {
-      
+      // The app can still load if the backup cannot be saved.
     }
+
     return [];
   }
 }
 
-// returns false if the browser refused to save
 export function savePeople(people: Person[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(people));

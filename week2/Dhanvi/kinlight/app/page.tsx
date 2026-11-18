@@ -1,45 +1,35 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import AddPersonForm from "./components/AddPersonForm";
+import KinlightWordmark from "./components/KinlightWordmark";
+import VillageLandscape from "./components/VillageLandscape";
+import YourClock from "./components/YourClock";
+import SketchFilters from "./components/SketchFilters";
+import CornerActions from "./components/CornerActions";
 import VillageIsland from "./components/VillageIsland";
 import VillageHealth from "./components/VillageHealth";
+import MessageIdeasDrawer from "./components/MessageIdeasDrawer";
 import {
   daysSince,
-  overdueRatio,
-  villageHealth,
-  randomMessage,
+  daysUntilBirthday,
+  formatBirthday,
   loadPeople,
+  overdueRatio,
   savePeople,
-  lightLevel,
-  moodLabel,
+  villageHealth,
 } from "./lib/village";
 import type { Person } from "./lib/village";
-
-const pastelColors = [
-  "#66C5CC",
-  "#F6CF71",
-  "#F89C74",
-  "#DCB0F2",
-  "#87C55F",
-  "#9EB9F3",
-  "#FE88B1",
-  "#C9DB74",
-  "#8BE0A4",
-  "#B497E7",
-  "#B3B3B3",
-];
 
 export default function HomePage() {
   const [people, setPeople] = useState<Person[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
-  const [messagePersonId, setMessagePersonId] = useState<string | null>(null);
-  const [suggestedMessage, setSuggestedMessage] = useState("");
   const [checkedInPersonId, setCheckedInPersonId] = useState<string | null>(
     null
   );
-  const [showPlaces, setShowPlaces] = useState(false);
+  const [isAddPanelOpen, setIsAddPanelOpen] = useState(false);
+  const [isIdeasPanelOpen, setIsIdeasPanelOpen] = useState(false);
   const [, setTick] = useState(0);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -50,16 +40,33 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!isLoaded) return;
+
     setSaveFailed(!savePeople(people));
   }, [people, isLoaded]);
 
   useEffect(() => {
     const timer = setInterval(() => setTick((tick) => tick + 1), 60 * 1000);
+
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    if (!isAddPanelOpen && !isIdeasPanelOpen) return;
+
+    if (isAddPanelOpen) nameInputRef.current?.focus();
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsAddPanelOpen(false);
+        setIsIdeasPanelOpen(false);
+      }
+    }
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [isAddPanelOpen, isIdeasPanelOpen]);
+
   function addPerson(person: Person) {
     setPeople((previousPeople) => [...previousPeople, person]);
+    setIsAddPanelOpen(false);
   }
 
   function checkIn(id: string) {
@@ -79,9 +86,16 @@ export default function HomePage() {
 
     setCheckedInPersonId(id);
 
+    // the "Checked in!" confirmation stays up for about 4 seconds
     window.setTimeout(() => {
-      setCheckedInPersonId(null);
-    }, 2500);
+      setCheckedInPersonId((current) => (current === id ? null : current));
+    }, 4000);
+  }
+
+  function updatePerson(updated: Person) {
+    setPeople((previousPeople) =>
+      previousPeople.map((person) => (person.id === updated.id ? updated : person))
+    );
   }
 
   function removePerson(person: Person) {
@@ -90,27 +104,6 @@ export default function HomePage() {
     setPeople((previousPeople) =>
       previousPeople.filter((savedPerson) => savedPerson.id !== person.id)
     );
-
-    if (messagePersonId === person.id) {
-      setMessagePersonId(null);
-    }
-  }
-
-  function openMessage(person: Person) {
-    setMessagePersonId(person.id);
-    setSuggestedMessage(randomMessage(person.name));
-  }
-
-  function copyMessage() {
-    navigator.clipboard?.writeText(suggestedMessage);
-  }
-
-  function focusAddForm() {
-    nameInputRef.current?.focus();
-    nameInputRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
   }
 
   const sortedPeople = [...people].sort(
@@ -126,157 +119,82 @@ export default function HomePage() {
     0
   );
 
-  const peopleByPlace: Record<string, Person[]> = {};
+  const upcomingBirthdays = people
+    .flatMap((person) => {
+      if (!person.birthday) return [];
 
-  people.forEach((person) => {
-    const place = person.city || "Place not set";
+      const days = daysUntilBirthday(person.birthday);
 
-    if (!peopleByPlace[place]) {
-      peopleByPlace[place] = [];
-    }
+      if (days === null || days > 30) return [];
 
-    peopleByPlace[place].push(person);
-  });
+      return [{ person, days, birthday: person.birthday }];
+    })
+    .sort((a, b) => a.days - b.days);
 
   return (
-    <div
-      className="page"
-      style={{
-        background: `radial-gradient(ellipse at top, rgba(219, 183, 93, ${health * 0.16}), transparent 65%), #f7f5ed`,
-      }}
-    >
+    <div className="page">
+      <SketchFilters />
+      <VillageLandscape />
       <main className="page-content">
-        <h1 className="brand-title">Kinlight</h1>
+        <header className="village-header">
+          {people.length > 0 && <div className="header-health-slot"><VillageHealth health={health} checkInsThisWeek={checkInsThisWeek} /></div>}
+          <div className="brand-lockup">
+            <h1 className="brand-title" aria-label="Kinlight"><KinlightWordmark /></h1>
+            <CornerActions
+              onAddPerson={() => setIsAddPanelOpen(true)}
+              onMessageIdeas={() => setIsIdeasPanelOpen(true)}
+              isAddOpen={isAddPanelOpen}
+            />
+          </div>
+          <div className="header-actions">
+          <YourClock />
+          </div>
+        </header>
 
-        <p className="intro-question">
-          Who would you like to check in on?
-        </p>
+        {saveFailed && <p className="save-error" role="alert">Your browser couldn&apos;t save your village. Changes may be lost when you close this tab.</p>}
 
-        {saveFailed && (
-          <p className="save-error">
-            Your browser couldn&apos;t save your village. Changes may be lost
-            when you close this tab.
-          </p>
-        )}
-
-        {people.length > 0 && (
-          <VillageHealth
-            health={health}
-            checkInsThisWeek={checkInsThisWeek}
-          />
-        )}
-
-        <div className="add-person">
-          <AddPersonForm
-            onAdd={addPerson}
-            nameInputRef={nameInputRef}
-          />
-        </div>
-
-        <div className="village">
-          {sortedPeople.map((person) => (
-            <div key={person.id}>
-              <VillageIsland
-                person={person}
-                isCheckedIn={checkedInPersonId === person.id}
-                onCheckIn={() => checkIn(person.id)}
-                onMessage={() => openMessage(person)}
-                onRemove={() => removePerson(person)}
-              />
-
-              {messagePersonId === person.id && (
-                <div className="message-box">
-                  <p>{suggestedMessage}</p>
-
-                  <div className="message-actions">
-                    <button className="btn" onClick={copyMessage}>
-                      Copy
-                    </button>
-
-                    <button
-                      className="btn"
-                      onClick={() => openMessage(person)}
-                    >
-                      Try another
-                    </button>
-
-                    <button
-                      className="btn btn-ghost"
-                      onClick={() => setMessagePersonId(null)}
-                    >
-                      Close
-                    </button>
-                  </div>
+        <section className="village-scene" aria-labelledby="village-heading">
+          <div className="scene-heading">
+            <h2 id="village-heading">Your village</h2>
+          </div>
+          {people.length === 0 ? (
+            <div className="empty-village"><span className="empty-village-art" aria-hidden="true">⌂</span><p>Your village is waiting for its first neighbor.</p><button className="btn btn-primary" onClick={() => setIsAddPanelOpen(true)}>Add your first person</button></div>
+          ) : (
+            <div className="village">
+              {sortedPeople.map((person) => (
+                <div key={person.id}>
+                  <VillageIsland person={person} isCheckedIn={checkedInPersonId === person.id} onCheckIn={() => checkIn(person.id)} onRemove={() => removePerson(person)} onUpdate={updatePerson} />
                 </div>
-              )}
+              ))}
             </div>
-          ))}
+          )}
+        </section>
 
-          <button
-            className="island island-add"
-            style={{
-              borderRadius: "48% 52% 44% 56% / 56% 44% 56% 44%",
-            }}
-            onClick={focusAddForm}
-          >
-            <span className="add-icon">＋</span>
-            {people.length === 0
-              ? "Your village is empty. Add your first person."
-              : "Add someone"}
-          </button>
-        </div>
+        {people.length > 0 && <div className="village-supporting">
+          {upcomingBirthdays.length > 0 && <section className="birthday-section" aria-labelledby="birthdays-heading">
+            <div className="birthday-heading"><h2 id="birthdays-heading">Upcoming birthdays in your village</h2><span>Next 30 days</span></div>
+            <ul className="birthday-list">{upcomingBirthdays.map(({ person, days, birthday }) => <li className="birthday-item" key={person.id}><span className="birthday-flower" aria-hidden="true">✿</span><div className="birthday-person"><strong>{person.name}</strong><span>{formatBirthday(birthday)}</span></div><span className="birthday-countdown">{days === 0 ? "Today!" : days === 1 ? "Tomorrow" : `In ${days} days`}</span></li>)}</ul>
+          </section>}
+        </div>}
 
-        {people.length > 0 && (
-          <section className="places-section">
-            <button
-              className="btn places-button"
-              onClick={() => setShowPlaces(!showPlaces)}
-              aria-expanded={showPlaces}
-            >
-              {showPlaces ? "Hide places" : "Explore by place"}
-            </button>
 
-            {showPlaces && (
-              <div className="places-grid">
-                {Object.entries(peopleByPlace).map(([place, placePeople]) => (
-                  <section className="place-village" key={place}>
-                    <h2>{place}</h2>
-                    <p>
-                      {placePeople.length}{" "}
-                      {placePeople.length === 1 ? "person" : "people"}
-                    </p>
-
-                    <div className="place-people">
-                      {placePeople.map((person) => {
-                        const light = lightLevel(person);
-                        const colorIndex =
-                          person.id.charCodeAt(0) % pastelColors.length;
-                        const color = pastelColors[colorIndex];
-
-                        return (
-                          <div className="place-person" key={person.id}>
-                            <span
-                              className="place-dot"
-                              style={{
-                                backgroundColor: color,
-                                opacity: 0.3 + light * 0.7,
-                              }}
-                            />
-                            <span>{person.name}</span>
-                            <span className="place-mood">
-                              {moodLabel(light)}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </section>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
       </main>
+
+      {/* Add person + message ideas live in the bottom-right corner */}
+
+      {isIdeasPanelOpen && <MessageIdeasDrawer
+        people={people}
+        onClose={() => setIsIdeasPanelOpen(false)}
+        onAddPerson={() => { setIsIdeasPanelOpen(false); setIsAddPanelOpen(true); }}
+      />}
+
+      {isAddPanelOpen && <div className="drawer-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsAddPanelOpen(false); }}>
+        <section className="add-person-drawer" role="dialog" aria-modal="true" aria-labelledby="add-person-title">
+          <div className="drawer-heading"><div><p className="eyebrow">Make room in your village</p><h2 id="add-person-title">Add a person</h2></div><button className="drawer-close" onClick={() => setIsAddPanelOpen(false)} aria-label="Close add person panel">×</button></div>
+          <p className="drawer-copy">A few details help Kinlight keep their neighborhood in view.</p>
+          <AddPersonForm onAdd={addPerson} nameInputRef={nameInputRef} />
+        </section>
+      </div>}
     </div>
   );
 }

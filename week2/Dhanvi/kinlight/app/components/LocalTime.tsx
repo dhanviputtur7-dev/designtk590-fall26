@@ -2,7 +2,15 @@
 import { useEffect, useState } from "react";
 import { getTimeIn, fallbackTime, isGoodTimeToCall, LocalTimeInfo } from "../lib/time";
 
-export default function LocalTime({ timezone, city }: { timezone: string; city: string }) {
+export default function LocalTime({
+  timezone,
+  city,
+  detailed = false,
+}: {
+  timezone: string;
+  city: string;
+  detailed?: boolean;
+}) {
   const [info, setInfo] = useState<LocalTimeInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,14 +31,22 @@ export default function LocalTime({ timezone, city }: { timezone: string; city: 
     load();
   }, [timezone]);
 
-  if (loading) return <p>Checking the time in {city}...</p>;
+  if (loading) return <p className="local-time-line">Checking local time…</p>;
   if (!info) return null;
 
-  return (
-    <div>
-      <p>It's {info.label} in {city}</p>
-      <p>{isGoodTimeToCall(info.hour) ? "Good time to call" : "Send a text, call later"}</p>
-      {error && <small>{error}</small>}
+  const shortCity = city.split(",")[0].trim();
+
+  return detailed ? (
+    <div className="local-time-detail" title={error ?? undefined}>
+      <p className="local-time-place">{city}</p>
+      <p className="local-time-line"><time>{info.label}</time></p>
+      <p className="contact-timing">{isGoodTimeToCall(info.hour) ? "Good time to call" : "Send a text, call later"}</p>
+    </div>
+  ) : (
+    <div className="local-time-line" title={error ?? undefined}>
+      <span>{shortCity}</span>
+      <span aria-hidden="true">·</span>
+      <time>{info.label}</time>
     </div>
   );
 }
