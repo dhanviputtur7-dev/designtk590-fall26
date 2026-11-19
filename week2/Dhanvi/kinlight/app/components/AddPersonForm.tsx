@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, type RefObject } from "react";
 import { geocodeCity } from "../lib/time";
+import BirthdayPicker from "./BirthdayPicker";
 import type { Frequency, Person } from "../lib/village";
 
 type Props = {
@@ -22,6 +23,7 @@ export default function AddPersonForm({ onAdd, nameInputRef }: Props) {
   const [name, setName] = useState("");
   const [relationship, setRelationship] = useState("");
   const [city, setCity] = useState("");
+  const [birthday, setBirthday] = useState("");
   const [frequency, setFrequency] = useState<Frequency>("weekly");
   const [lastContactDate, setLastContactDate] = useState("");
   const [adding, setAdding] = useState(false);
@@ -79,11 +81,13 @@ export default function AddPersonForm({ onAdd, nameInputRef }: Props) {
       checkInHistory: [],
       city: cityName,
       timezone,
+      birthday: birthday || undefined, // "MM-DD"
     });
 
     setName("");
     setRelationship("");
     setCity("");
+    setBirthday("");
     setFrequency("weekly");
     setLastContactDate("");
   }
@@ -92,7 +96,7 @@ export default function AddPersonForm({ onAdd, nameInputRef }: Props) {
     <>
       <form
         onSubmit={handleSubmit}
-        style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}
+        className="add-person-form"
       >
         <input
           ref={nameInputRef}
@@ -100,6 +104,7 @@ export default function AddPersonForm({ onAdd, nameInputRef }: Props) {
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Name"
+          aria-label="Name"
           required
         />
 
@@ -108,6 +113,7 @@ export default function AddPersonForm({ onAdd, nameInputRef }: Props) {
           value={relationship}
           onChange={(event) => setRelationship(event.target.value)}
           placeholder="Relationship"
+          aria-label="Relationship"
         />
 
         <label className="date-field">
@@ -122,27 +128,29 @@ export default function AddPersonForm({ onAdd, nameInputRef }: Props) {
           />
         </label>
 
+        <BirthdayPicker idPrefix="add-birthday" value={birthday} onChange={setBirthday} />
+
         <input
-          className="field"
-          style={{ minWidth: 230 }}
+          className="field city-field"
           value={city}
           onChange={(event) => setCity(event.target.value)}
           placeholder="City, Country (e.g. Mangalore, India)"
+          aria-label="City and country"
         />
 
-        <select
-          className="field"
-          style={{ flex: "none", minWidth: 0 }}
-          value={frequency}
-          onChange={(event) =>
-            setFrequency(event.target.value as Frequency)
-          }
-        >
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="biweekly">Bi-weekly</option>
-          <option value="monthly">Monthly</option>
-        </select>
+        <label className="date-field">
+          Check-in frequency
+          <select
+            className="field frequency-field"
+            value={frequency}
+            onChange={(event) => setFrequency(event.target.value as Frequency)}
+          >
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Bi-weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </label>
 
         <button type="submit" className="btn btn-primary" disabled={adding}>
           {adding ? "Adding..." : "Add"}

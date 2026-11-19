@@ -1,10 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f5ed;
-  --foreground: #2f352e;
-  --gold: #ead17c;
-  --muted: #72766e;
+  --background: #f4f1e8;
+  --foreground: #26352f;
+  --muted: #73786d;
+  --gold: #e6c766;
+  --paper: #fffdf7;
+  --green: #738967;
+  --blue: #6c9eaa;
+  --line: #d8d2c3;
 }
 
 @theme inline {
@@ -12,6 +16,10 @@
   --color-foreground: var(--foreground);
   --font-sans: Arial, Helvetica, sans-serif;
   --font-mono: monospace;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
@@ -22,30 +30,79 @@ body {
 }
 
 .page {
+  position: relative;
   min-height: 100vh;
+  background-color: var(--background);
+}
+
+.page::before {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  background-image: radial-gradient(#aaa99f 0.8px, transparent 0.8px);
+  background-size: 22px 22px;
+  content: "";
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .page-content {
-  width: 92%;
-  max-width: 1100px;
+  position: relative;
+  z-index: 1;
+  width: min(96%, 1400px);
   margin: 0 auto;
-  padding: 3rem 0;
+  padding: 3.5rem 0 5rem;
 }
 
+/* Logo */
+
 .brand-title {
-  margin: 0 0 1rem;
-  color: #26352c;
-  font-family: "Trebuchet MS", Arial, sans-serif;
-  font-size: clamp(3.5rem, 8vw, 6rem);
-  font-weight: 900;
-  letter-spacing: -0.07em;
+  margin: 0 0 0.5rem;
+  color: #283b33;
+  font-family: var(--font-caveat), "Comic Sans MS", cursive;
+  font-size: clamp(4.5rem, 11vw, 7.5rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
   line-height: 1;
+  text-align: center;
+}
+
+.logo-h {
+  display: inline-block;
+  height: 0.85em;
+  width: auto;
+  margin: 0 0.02em;
+  vertical-align: -0.04em;
+  overflow: visible;
+}
+
+.logo-window {
+  animation: window-glow 3.5s ease-in-out infinite;
+}
+
+.logo-window:nth-of-type(2) {
+  animation-delay: 1.4s;
+}
+
+@keyframes window-glow {
+  0%,
+  100% {
+    fill: #f6cf71;
+  }
+
+  50% {
+    fill: #fff0b0;
+  }
 }
 
 .intro-question {
-  margin: 0 0 2rem;
-  color: #62675e;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  color: #626b60;
+  font-family: var(--font-patrick), "Comic Sans MS", cursive;
   font-size: clamp(1.3rem, 2.4vw, 2rem);
+  line-height: 1.35;
+  text-align: center;
 }
 
 .save-error,
@@ -63,9 +120,18 @@ body {
 
 .add-person {
   margin: 2rem 0 3rem;
+  padding: 1rem;
+  border: 1px solid rgba(150, 142, 119, 0.35);
+  border-radius: 18px;
+  background: rgba(255, 253, 247, 0.78);
+  box-shadow: 0 5px 18px rgba(62, 64, 48, 0.05);
 }
 
-/* Form fields */
+.add-person-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
 
 .field {
   flex: 1;
@@ -73,13 +139,14 @@ body {
   padding: 0.75rem 1rem;
   border: 1px solid #d5cfbd;
   border-radius: 999px;
-  background: #fffdf7;
+  background: var(--paper);
   color: var(--foreground);
   font: inherit;
 }
 
 .field:focus {
-  outline: 2px solid #8eb6c8;
+  border-color: var(--blue);
+  outline: 2px solid rgba(108, 158, 170, 0.2);
 }
 
 .date-field {
@@ -96,24 +163,35 @@ body {
   width: 100%;
 }
 
-/* Buttons */
+.city-field {
+  min-width: 230px;
+}
+
+.frequency-field {
+  flex: none;
+  min-width: 0;
+}
 
 .btn {
   padding: 0.65rem 0.9rem;
   border: 1px solid #c7b987;
   border-radius: 999px;
-  background: transparent;
+  background: rgba(255, 253, 247, 0.72);
   color: var(--foreground);
   font: inherit;
   cursor: pointer;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
 }
 
 .btn:hover {
-  background: rgba(234, 209, 124, 0.2);
+  background: rgba(234, 209, 124, 0.28);
+  transform: translateY(-1px);
 }
 
 .btn-primary {
-  border-color: #dfc66e;
+  border-color: #d5bd65;
   background: var(--gold);
   color: #3d392a;
   font-weight: 700;
@@ -130,10 +208,140 @@ body {
 
 .btn-ghost {
   border-color: transparent;
+  background: transparent;
   color: var(--muted);
 }
 
-/* People and their village blobs */
+/* Village status */
+
+.village-health {
+  margin-bottom: 2rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(150, 142, 119, 0.35);
+  border-radius: 16px;
+  background: rgba(255, 253, 247, 0.72);
+}
+
+.health-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.health-heading h2 {
+  margin: 0 0 0.6rem;
+  color: #283b33;
+  font-family: var(--font-patrick), "Comic Sans MS", cursive;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.health-heading > span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.health-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5e0d2;
+}
+
+.health-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8da77a, #e6c766);
+  transition: width 0.8s ease;
+}
+
+.health-caption {
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Birthday reminders */
+
+.birthday-section {
+  margin: 0 0 2rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid #c8b987;
+  border-radius: 18px;
+  background: rgba(255, 253, 247, 0.88);
+  box-shadow: 0 5px 18px rgba(62, 64, 48, 0.05);
+}
+
+.birthday-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.birthday-heading h2 {
+  margin: 0;
+  color: #283b33;
+  font-family: var(--font-patrick), "Comic Sans MS", cursive;
+  font-size: 1.3rem;
+}
+
+.birthday-heading > span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.birthday-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.birthday-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-top: 1px solid rgba(150, 142, 119, 0.25);
+}
+
+.birthday-flower {
+  color: #bd8055;
+  font-size: 1.4rem;
+}
+
+.birthday-person {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.birthday-person strong {
+  color: var(--foreground);
+}
+
+.birthday-person span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.birthday-countdown {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: #f4e8bd;
+  color: #5b5034;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* Round person islands */
 
 .village {
   display: grid;
@@ -142,20 +350,33 @@ body {
   gap: 2rem 2.5rem;
 }
 
+.village > div .island {
+  width: min(100%, 320px);
+  aspect-ratio: 1;
+  min-height: 0;
+  justify-self: center;
+  border-radius: 0;
+}
+
 .island {
   display: flex;
-  min-height: 290px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  padding: 2rem;
+  gap: 0.4rem;
+  padding: 1.5rem;
   color: var(--foreground);
   text-align: center;
-  transition: background 0.8s, box-shadow 0.8s, border-color 0.8s;
+  transition:
+    background 0.8s,
+    box-shadow 0.8s,
+    border-color 0.8s,
+    transform 180ms ease;
 }
 
-/* Stagger the blobs on wider screens. */
+.village > div .island:hover {
+  transform: translateY(-4px);
+}
 
 @media (min-width: 700px) {
   .village > div:nth-child(3n + 2) {
@@ -169,52 +390,60 @@ body {
 
 .house-icon {
   margin-bottom: 0.3rem;
-  font-size: 3rem;
+  font-size: 2.5rem;
 }
 
 .person-name {
+  color: #26352c;
+  font-family: var(--font-patrick), "Comic Sans MS", cursive;
   font-size: 1.4rem;
 }
 
 .person-detail {
   color: #656a61;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .person-time {
-  margin-top: 0.3rem;
-  font-size: 0.95rem;
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
 }
 
 .person-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.5rem;
-  margin-top: 0.8rem;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
 }
 
 .check-in-success {
-  margin: 0.5rem 0 0;
-  padding: 0.4rem 0.8rem;
+  margin: 0.4rem 0 0;
+  padding: 0.35rem 0.7rem;
   border-radius: 999px;
   background: #e0eff0;
   color: #4f7880;
   font-weight: 700;
 }
 
-/* Add a person */
+/* Add-person circle */
 
 .island-add {
-  border: 1px dashed #c3bdad;
-  background: transparent;
+  width: min(100%, 320px);
+  aspect-ratio: 1;
+  min-height: 0;
+  justify-self: center;
+  border: 1px dashed #9fa792;
+  border-radius: 50% !important;
+  background: rgba(255, 253, 247, 0.55);
   color: var(--muted);
   font: inherit;
   cursor: pointer;
 }
 
 .island-add:hover {
-  border-color: #8eb6c8;
+  border-color: var(--blue);
+  background: rgba(226, 238, 231, 0.7);
   color: #527d83;
 }
 
@@ -222,88 +451,7 @@ body {
   font-size: 2.5rem;
 }
 
-/* Suggested message */
-
-.message-box {
-  margin-top: 1rem;
-  padding: 1rem;
-  border: 1px solid #d5cfbd;
-  border-radius: 16px;
-  background: #fffdf7;
-  text-align: center;
-}
-
-.message-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-/* Group people into larger place bubbles */
-
-.places-section {
-  margin-top: 4rem;
-  text-align: center;
-}
-
-.places-button {
-  padding: 0.8rem 1.4rem;
-}
-
-.places-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-  text-align: left;
-}
-
-.place-village {
-  padding: 1.5rem;
-  border: 1px solid #c8b6cf;
-  border-radius: 42% 58% 50% 50% / 50% 45% 55% 50%;
-  background: rgba(185, 163, 190, 0.16);
-}
-
-.place-village h2 {
-  margin: 0;
-  color: #26352c;
-}
-
-.place-village > p {
-  margin: 0.35rem 0 1rem;
-  color: var(--muted);
-}
-
-.place-people {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.place-person {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.place-dot {
-  width: 1rem;
-  height: 1rem;
-  flex: 0 0 1rem;
-  border: 1px solid rgba(47, 53, 46, 0.18);
-  border-radius: 50%;
-}
-
-.place-mood {
-  margin-left: auto;
-  color: var(--muted);
-  font-size: 0.85rem;
-}
-
-/* Gentle movement for glowing houses */
-
+/* Respect reduced-motion settings. */
 @keyframes breathe {
   0%,
   100% {
@@ -320,21 +468,27 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .breathing {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
-/* Smaller screen layout */
-
 @media (max-width: 600px) {
   .page-content {
-    width: 90%;
-    padding: 2rem 0;
+    width: 96%;
+    padding: 2rem 0 3rem;
   }
 
-  .village,
-  .places-grid {
+  .add-person {
+    padding: 0.75rem;
+  }
+
+  .village {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
@@ -343,7 +497,1369 @@ body {
     transform: none;
   }
 
+  .village > div .island,
+  .island-add {
+    width: min(100%, 320px);
+  }
+
   .brand-title {
-    font-size: 3.2rem;
+    font-size: 4rem;
+  }
+
+  .birthday-section {
+    padding: 1rem;
+  }
+
+  .birthday-item {
+    gap: 0.5rem;
+  }
+
+  .birthday-countdown {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
   }
 }
+/* Village-first home and person drawer */
+.village-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.brand-lockup { min-width: 0; }
+.brand-lockup .brand-title {
+  margin: 0;
+  font-size: clamp(3.5rem, 8vw, 5.6rem);
+  text-align: left;
+}
+.brand-lockup .intro-question {
+  margin: 0.25rem 0 0;
+  text-align: left;
+  font-size: 1.25rem;
+}
+.add-person-trigger { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 1.2rem; }
+.add-house-icon { font-size: 1.4rem; line-height: 1; }
+
+.village-scene {
+  position: relative;
+  min-height: 420px;
+  margin: 1rem 0 2rem;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  overflow: hidden;
+  border: 1px solid #c9c9ad;
+  border-radius: 36px 28px 38px 26px;
+  background:
+    radial-gradient(ellipse at 12% 78%, rgba(174, 192, 142, 0.17) 0 8%, transparent 8.5%),
+    radial-gradient(ellipse at 88% 16%, rgba(143, 185, 185, 0.15) 0 9%, transparent 9.5%),
+    rgba(255, 253, 247, 0.66);
+  box-shadow: 0 12px 32px rgba(62, 64, 48, 0.055);
+}
+.scene-heading { position: relative; z-index: 1; display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+.scene-heading h2, .drawer-heading h2 { margin: 0; color: #283b33; font-family: var(--font-patrick), "Comic Sans MS", cursive; font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 600; }
+.eyebrow { margin: 0 0 0.2rem; color: #6b765f; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; }
+.village-scene .village { position: relative; z-index: 1; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 1.4rem 1.8rem; }
+.village-scene .village > div:nth-child(n) { transform: none; }
+.village-scene .village > div .island { width: min(100%, 280px); border-radius: 0; background-color: rgba(255, 253, 247, 0.58); }
+.empty-village { display: flex; min-height: 285px; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; color: #596b54; text-align: center; }
+.empty-village p { margin: 0; font-family: var(--font-patrick), "Comic Sans MS", cursive; font-size: 1.35rem; }
+.empty-village-art { display: grid; width: 5rem; height: 5rem; place-items: center; border: 1px dashed #8b9a7b; border-radius: 44% 56% 50% 50%; color: #748b62; font-size: 3rem; }
+.village-supporting { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); align-items: start; gap: 1.25rem; }
+.village-supporting .village-health, .village-supporting .birthday-section { margin: 0; height: 100%; }
+
+.drawer-backdrop { position: fixed; z-index: 20; inset: 0; display: flex; justify-content: flex-end; background: rgba(36, 46, 38, 0.34); backdrop-filter: blur(2px); }
+.add-person-drawer { width: min(100%, 460px); height: 100%; overflow-y: auto; padding: clamp(1.5rem, 4vw, 2.5rem); border-left: 1px solid #d4cfbb; background: #fbf9f1; box-shadow: -12px 0 40px rgba(37, 48, 39, 0.14); animation: drawer-in 220ms ease-out both; }
+@keyframes drawer-in { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.drawer-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.drawer-close { display: grid; width: 2.7rem; height: 2.7rem; place-items: center; border: 1px solid #d5cfbd; border-radius: 50%; background: #fffdf7; color: #34463a; font-size: 1.7rem; cursor: pointer; }
+.drawer-copy { margin: 0.75rem 0 1.5rem; color: #697164; line-height: 1.5; }
+.add-person-drawer .add-person-form { display: flex; flex-direction: column; gap: 0.9rem; }
+.add-person-drawer .field { width: 100%; min-height: 48px; flex: auto; border-radius: 14px; }
+.add-person-drawer .date-field { width: 100%; gap: 0.4rem; font-size: 0.95rem; }
+.add-person-drawer .date-field .field { width: 100%; }
+.add-person-drawer .add-person-form > .btn { min-height: 48px; margin-top: 0.25rem; }
+.add-person-drawer .form-error { line-height: 1.45; }
+
+.btn:focus-visible, .drawer-close:focus-visible, .field:focus-visible { outline: 3px solid #3d7880; outline-offset: 3px; }
+
+@media (max-width: 600px) {
+  .village-header { align-items: flex-start; gap: 1rem; }
+  .brand-lockup .brand-title { font-size: 3.5rem; }
+  .brand-lockup .intro-question { font-size: 1rem; }
+  .add-person-trigger { flex: 0 0 auto; padding: 0.7rem 0.85rem; font-size: 0.9rem; }
+  .add-house-icon { display: none; }
+  .village-scene { min-height: 360px; padding: 1.15rem; border-radius: 26px 20px 28px 22px; }
+  .scene-heading { align-items: flex-start; }
+  .village-scene .village { grid-template-columns: 1fr; }
+  .village-scene .village > div .island { width: min(100%, 310px); }
+  .village-supporting { grid-template-columns: 1fr; }
+  .add-person-drawer { width: 100%; border-left: 0; }
+}
+
+/* Illustrated village treatment: a small storybook map, drawn in SVG and CSS. */
+.page::before {
+  background-image: radial-gradient(#8f9a7b 0.75px, transparent 0.8px);
+  background-size: 24px 24px;
+  opacity: 0.22;
+}
+
+.brand-title,
+.scene-heading h2,
+.drawer-heading h2,
+.person-name,
+.empty-village p,
+.birthday-heading h2 {
+  font-family: "Marker Felt", "Chalkboard SE", "Comic Sans MS", cursive;
+  letter-spacing: 0.015em;
+}
+
+.village-scene {
+  isolation: isolate;
+  border: 2px solid #b4b58e;
+  border-radius: 44px 30px 40px 27px;
+  background-color: #edf0dc;
+  background-image:
+    radial-gradient(ellipse at 10% 79%, #cbdcae 0 8%, transparent 8.3%),
+    radial-gradient(ellipse at 92% 15%, #d0e1d2 0 11%, transparent 11.3%),
+    radial-gradient(ellipse at 71% 91%, #f4e8ba 0 7%, transparent 7.4%),
+    linear-gradient(180deg, #f8f4df 0%, #f1efd9 63%, #e3e9c9 100%);
+  box-shadow: 0 9px 0 rgba(94, 115, 81, 0.08), 0 18px 36px rgba(62, 64, 48, 0.07);
+}
+.village-scene::before,
+.village-scene::after {
+  position: absolute;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+}
+.village-scene::before {
+  right: 7%;
+  bottom: 6%;
+  width: 94px;
+  height: 40px;
+  border: 2px solid #7eaaa0;
+  border-radius: 51% 49% 46% 54%;
+  background: #b9ded1;
+  transform: rotate(-8deg);
+  box-shadow: inset 0 0 0 5px rgba(255,255,255,.2);
+}
+.village-scene::after {
+  left: 3%;
+  bottom: 4%;
+  width: 112px;
+  height: 62px;
+  border-bottom: 3px solid #94a978;
+  border-radius: 50%;
+  opacity: .75;
+  transform: rotate(8deg);
+}
+.scene-heading { position: relative; z-index: 2; }
+.scene-heading h2 { font-size: clamp(2rem, 3vw, 2.7rem); }
+.eyebrow { color: #63754f; }
+
+.village-scene .village {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr));
+  align-items: center;
+  gap: 2rem 1.7rem;
+}
+.village-scene .village > div .island {
+  position: relative;
+  display: flex;
+  width: min(100%, 390px);
+  min-height: 435px;
+  aspect-ratio: auto;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  overflow: visible;
+  padding: 0.45rem 1.35rem 1.35rem;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+.village-scene .village > div .island:hover { transform: translateY(-5px) rotate(-0.5deg); }
+.neighborhood-art {
+  display: block;
+  width: calc(100% + 1.6rem);
+  height: 184px;
+  flex: 0 0 auto;
+  margin: 0 -0.8rem -0.1rem;
+  overflow: visible;
+}
+.neighborhood-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.7rem;
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  border-radius: 999px;
+  background: rgba(255, 253, 247, 0.82);
+  color: #536e49;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: .035em;
+  text-transform: capitalize;
+}
+.village-scene .person-name { margin-top: .3rem; font-size: 1.55rem; }
+.village-scene .person-detail { color: #596758; }
+.village-scene .person-time { max-width: 100%; color: #364b3e; line-height: 1.4; }
+.village-scene .person-actions { margin-top: auto; padding-top: .7rem; }
+.village-scene .check-in-success { margin-top: .5rem; }
+
+.empty-village-art { position: relative; border: 2px solid #778e65; background: #e0e9c9; box-shadow: 0 4px 0 rgba(90, 112, 73, .12); transform: rotate(-4deg); }
+.empty-village-art::after { position: absolute; right: -1.3rem; bottom: -0.2rem; content: "✿"; color: #bd8959; font-size: 1.4rem; transform: rotate(10deg); }
+.empty-village { min-height: 320px; }
+
+@media (max-width: 600px) {
+  .village-scene { border-radius: 30px 22px 28px 20px; }
+  .village-scene .village > div .island { width: min(100%, 350px); min-height: 420px; }
+  .neighborhood-art { height: 176px; }
+  .village-scene::before { right: 5%; width: 60px; height: 27px; }
+}
+
+/* Brighter coastal landscape drawn from the supplied background reference. */
+:root {
+  --background: #e6f4f3;
+  --foreground: #2e494b;
+  --muted: #637675;
+  --gold: #f3c753;
+  --paper: #fff9e8;
+  --green: #528d56;
+  --blue: #4cabb9;
+  --line: #96c8c9;
+}
+body { background: #e6f4f3; color: var(--foreground); }
+.page { background: linear-gradient(180deg, #d9f1f8 0%, #e4f5ed 48%, #d0e9cf 100%); }
+.page::before { opacity: .16; background-image: radial-gradient(#4e8c94 .8px, transparent .9px); }
+.village-scene {
+  border-color: #4c8991;
+  background-color: #e6f2dc;
+  background-image:
+    radial-gradient(ellipse at 88% 14%, rgba(255, 219, 119, .45) 0 54px, transparent 56px),
+    linear-gradient(180deg, #c7e9f3 0%, #dcefcf 58%, #c4df9e 100%);
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 8px 0 rgba(42, 108, 107, .14), 0 18px 34px rgba(37, 91, 100, .1);
+}
+.village-scene::before { border-color: #268ca0; background: #58c6d1; }
+.village-scene::after { border-color: #5b9e5e; }
+.village-scene .village > div .island {
+  border: 0 !important;
+  background: transparent;
+  box-shadow: none;
+}
+.village-scene .village > div:nth-child(4n + 1) .island { --house-accent: #e75c4a; }
+.village-scene .village > div:nth-child(4n + 2) .island { --house-accent: #2193a4; }
+.village-scene .village > div:nth-child(4n + 3) .island { --house-accent: #d58b35; }
+.village-scene .village > div:nth-child(4n) .island { --house-accent: #687fbd; }
+.neighborhood-status { border-color: #82a86d; background: #fff5d4; color: #3e704b; }
+.empty-village-art { border-color: #268c86; background: #a7dbaf; color: #286f68; }
+
+/* Every person gets a stable, individually generated island silhouette. */
+.island-shell {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 0 rgba(38, 95, 101, .16)) drop-shadow(0 14px 18px rgba(38, 95, 101, .12));
+}
+
+.village-scene .village > div .island { position: relative; z-index: 0; }
+.village-scene .village > div .island > :not(.island-shell) { position: relative; z-index: 1; }
+
+
+/* Open water stage: islands float without a shared card or status labels. */
+.village-header .intro-question { display: none; }
+.village-scene {
+  min-height: 0;
+  margin: .35rem 0 1rem;
+  padding: .25rem 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.village-scene::before,
+.village-scene::after { display: none; }
+.scene-heading { margin-bottom: .55rem; }
+.village-scene .village {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 295px), 1fr));
+  align-items: center;
+  gap: .75rem 1.1rem;
+}
+.village-scene .village > div .island {
+  width: min(100%, 365px);
+  min-height: 350px;
+  padding: .25rem 1.25rem 1rem;
+}
+.village-scene .neighborhood-art { height: 152px; }
+.village-scene .person-name { margin: .05rem 0 .15rem; font-size: 1.55rem; }
+.village-scene .person-time { margin: .05rem 0 .3rem; }
+.local-time-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: .4rem;
+  margin: 0;
+  color: #355b61;
+  font-size: .98rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+}
+.village-scene .person-actions { margin-top: auto; padding-top: .25rem; }
+.neighborhood-status { display: none; }
+
+@media (min-width: 700px) {
+  .village-scene .village > div:nth-child(5n + 1) { transform: translateY(42px) rotate(-1.8deg); }
+  .village-scene .village > div:nth-child(5n + 2) { transform: translateY(-8px) rotate(1.4deg); }
+  .village-scene .village > div:nth-child(5n + 3) { transform: translateY(24px) rotate(-.8deg); }
+  .village-scene .village > div:nth-child(5n + 4) { transform: translateY(46px) rotate(1.6deg); }
+  .village-scene .village > div:nth-child(5n + 5) { transform: translateY(2px) rotate(-1.2deg); }
+}
+@media (max-width: 699px) {
+  .village-scene .village { grid-template-columns: 1fr; gap: .8rem; }
+  .village-scene .village > div:nth-child(odd) { transform: translate(-4px, 4px) rotate(-1deg); }
+  .village-scene .village > div:nth-child(even) { transform: translate(4px, -3px) rotate(1deg); }
+  .village-scene .village > div .island { width: min(100%, 365px); min-height: 340px; }
+  .village-scene .neighborhood-art { height: 148px; }
+}
+
+.add-person-trigger {
+  display: grid;
+  width: 70px;
+  height: 70px;
+  flex: 0 0 70px;
+  place-items: center;
+  padding: 0;
+  border: 2px solid #b18b3d;
+  border-radius: 50%;
+  background: #f6cf71;
+  box-shadow: 0 4px 0 rgba(105, 84, 43, .15);
+}
+.add-person-trigger svg { display: block; width: 54px; height: 54px; }
+.add-person-trigger:hover { background: #f9d982; transform: translateY(-2px) rotate(-2deg); }
+.add-person-trigger:focus-visible { outline: 3px solid #3d7880; outline-offset: 4px; }
+@media (max-width: 600px) {
+  .add-person-trigger { width: 60px; height: 60px; flex-basis: 60px; }
+  .add-person-trigger svg { width: 48px; height: 48px; }
+}
+
+/* Keep island actions inside the shoreline and give the activity panel room. */
+.village-scene .village > div .island { padding-bottom: 1.3rem; }
+.village-scene .person-actions {
+  display: flex;
+  width: 100%;
+  min-height: 54px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  margin-top: auto;
+  padding-top: .4rem;
+}
+.village-scene .person-actions .btn-primary { min-width: 138px; min-height: 48px; padding-inline: 1.15rem; }
+.village-scene .person-actions > .btn:not(.btn-primary):not(.btn-ghost) {
+  display: grid;
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+}
+.village-scene .person-actions .btn-ghost {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  padding: 0;
+}
+.village-supporting {
+  width: min(100%, 820px);
+  margin: 2rem auto 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+.village-supporting .village-health {
+  width: min(100%, 680px);
+  min-width: 0;
+  margin: 0 auto;
+  padding: 1.2rem clamp(1rem, 3vw, 1.6rem);
+  box-sizing: border-box;
+}
+.village-health .health-heading { align-items: center; flex-wrap: wrap; gap: .35rem .9rem; }
+.village-health .health-heading h2 { max-width: 100%; margin: 0; font-size: clamp(1.15rem, 2.5vw, 1.45rem); line-height: 1.3; overflow-wrap: anywhere; }
+.village-health .health-heading > span { flex: 0 0 auto; margin-left: auto; }
+.village-health .health-track { margin-top: .8rem; }
+.village-health .health-caption { margin: .75rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
+.add-person-trigger svg { width: 52px; height: 52px; }
+@media (max-width: 600px) {
+  .village-scene .village > div .island { min-height: 355px; padding-bottom: 1.15rem; }
+  .village-scene .person-actions { gap: .4rem; }
+  .village-scene .person-actions .btn-primary { min-width: 124px; padding-inline: .9rem; }
+  .village-scene .person-actions > .btn:not(.btn-primary):not(.btn-ghost) { width: 46px; height: 46px; flex-basis: 46px; }
+  .village-scene .person-actions .btn-ghost { width: 34px; height: 34px; flex-basis: 34px; }
+}
+
+/* Secondary message-ideas action below Add Person. */
+.header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+}
+.message-ideas-trigger {
+  display: flex;
+  min-width: 84px;
+  flex-direction: column;
+  align-items: center;
+  gap: .15rem;
+  padding: .2rem .35rem;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #3f7375;
+  font: inherit;
+  font-size: .76rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.message-ideas-trigger svg { width: 38px; height: 38px; }
+.message-ideas-trigger:hover { background: rgba(255, 249, 232, .7); }
+.message-ideas-trigger:focus-visible { outline: 3px solid #3d7880; outline-offset: 2px; }
+
+.message-ideas-drawer .ideas-fields { display: flex; flex-direction: column; gap: 1rem; }
+.message-ideas-drawer .ideas-fields .date-field { min-width: 0; flex: none; gap: .45rem; color: #526258; font-size: .92rem; }
+.message-ideas-drawer .ideas-fields .field { width: 100%; min-height: 48px; border-radius: 14px; }
+.ideas-generate { width: 100%; min-height: 50px; margin-top: 1.2rem; }
+.ideas-empty-state { display: flex; flex-direction: column; align-items: flex-start; gap: .8rem; color: #59685c; line-height: 1.5; }
+.ideas-empty-state p { margin: 0; }
+.message-idea-results { display: grid; gap: .8rem; margin-top: 1.3rem; }
+.message-idea-card { display: flex; flex-direction: column; align-items: flex-end; gap: .55rem; padding: .85rem; border: 1px solid #d8d2bd; border-radius: 18px 14px 20px 15px; background: #fffdf5; }
+.message-idea-card textarea { width: 100%; min-height: 82px; resize: vertical; border: 0; outline: 0; background: transparent; color: #34483c; font: inherit; line-height: 1.5; }
+.message-idea-card textarea:focus-visible { outline: 2px solid #4c8991; outline-offset: 3px; border-radius: 6px; }
+.message-idea-card .btn { min-width: 82px; }
+@media (max-width: 600px) {
+  .header-actions { gap: .2rem; }
+  .message-ideas-trigger { min-width: 70px; font-size: .7rem; }
+  .message-ideas-trigger svg { width: 34px; height: 34px; }
+}
+
+/* Put village health at the upper left and center the scene title. */
+.village-scene .scene-heading {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.scene-health-slot { grid-column: 1; grid-row: 1; min-width: 0; }
+.scene-health-slot .village-health {
+  width: min(100%, 370px);
+  margin: 0;
+  padding: .85rem 1rem;
+  border-color: rgba(92, 139, 123, .38);
+  background: rgba(255, 253, 247, .82);
+  box-shadow: 0 4px 14px rgba(59, 99, 78, .06);
+}
+.scene-health-slot .health-heading h2 { font-size: clamp(1rem, 1.8vw, 1.3rem); }
+.scene-health-slot .health-heading > span { font-size: .85rem; }
+.scene-health-slot .health-track { height: 6px; margin-top: .55rem; }
+.scene-health-slot .health-caption { margin-top: .5rem; font-size: .82rem; line-height: 1.35; }
+.village-scene .scene-heading > h2 { grid-column: 2; grid-row: 1; margin: 0; white-space: nowrap; text-align: center; }
+.scene-heading-balance { grid-column: 3; grid-row: 1; }
+
+/* Matching circular tool buttons in the page header. */
+.message-ideas-trigger { min-width: 70px; gap: .2rem; padding: 0; }
+.message-ideas-trigger .message-ideas-icon {
+  display: grid;
+  width: 70px;
+  height: 70px;
+  place-items: center;
+  border: 2px solid #b18b3d;
+  border-radius: 50%;
+  background: #f6cf71;
+  box-shadow: 0 4px 0 rgba(105, 84, 43, .15);
+  transition: transform 160ms ease, background 160ms ease;
+}
+.message-ideas-trigger svg { width: 46px; height: 46px; }
+.message-ideas-trigger:hover .message-ideas-icon { background: #f9d982; transform: translateY(-2px) rotate(2deg); }
+.message-ideas-trigger:focus-visible { outline: none; }
+.message-ideas-trigger:focus-visible .message-ideas-icon { outline: 3px solid #3d7880; outline-offset: 4px; }
+
+/* Keep the check-in and illustrated remove controls over the island's broad center. */
+.village-scene .person-actions { margin-top: .55rem; padding-top: .1rem; }
+.village-scene .person-actions .btn-primary { min-width: 128px; min-height: 46px; padding-inline: 1rem; }
+.island-remove-button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  padding: 0;
+  border: 1.5px solid #bc8a5e;
+  border-radius: 47% 53% 49% 51%;
+  background: #fff5db;
+  box-shadow: 0 2px 0 rgba(105, 84, 43, .12);
+  cursor: pointer;
+  transform: rotate(-4deg);
+  transition: transform 160ms ease, background 160ms ease;
+}
+.island-remove-button svg { width: 22px; height: 22px; }
+.island-remove-button:hover { background: #f9e9c1; transform: rotate(4deg) scale(1.04); }
+.island-remove-button:focus-visible { outline: 3px solid #3d7880; outline-offset: 3px; }
+@media (max-width: 760px) {
+  .village-scene .scene-heading { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .65rem; }
+  .scene-health-slot { grid-column: 1; grid-row: 1; }
+  .village-scene .scene-heading > h2 { grid-column: 1 / -1; grid-row: 2; font-size: clamp(1.8rem, 7vw, 2.35rem); }
+  .scene-heading-balance { display: none; }
+  .scene-health-slot .village-health { width: min(100%, 320px); padding: .7rem .75rem; }
+  .scene-health-slot .health-heading { gap: .2rem .4rem; }
+  .scene-health-slot .health-heading h2 { font-size: .96rem; }
+  .scene-health-slot .health-heading > span { font-size: .75rem; }
+  .scene-health-slot .health-caption { font-size: .72rem; }
+  .message-ideas-trigger .message-ideas-icon { width: 60px; height: 60px; }
+  .message-ideas-trigger svg { width: 40px; height: 40px; }
+  .village-scene .person-actions { margin-top: .45rem; }
+  .village-scene .person-actions .btn-primary { min-width: 116px; min-height: 44px; }
+  .island-remove-button { width: 38px; height: 38px; flex-basis: 38px; }
+}
+
+/* Keep the Kinlight wordmark centered beside the village warmth summary. */
+.village-header {
+  position: relative;
+  justify-content: center;
+  margin-bottom: 1.4rem;
+}
+.header-brand-health {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.25rem, 4vw, 3.5rem);
+  padding: 0 12rem;
+}
+.brand-lockup .brand-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: clamp(3.4rem, 6vw, 5.3rem);
+  white-space: nowrap;
+}
+.header-health-slot { width: min(100%, 440px); }
+.header-health-slot .village-health {
+  margin: 0;
+  padding: 1rem 1.2rem;
+  border-color: rgba(92, 139, 123, .38);
+  background: rgba(255, 253, 247, .86);
+  box-shadow: 0 4px 14px rgba(59, 99, 78, .06);
+}
+.header-actions {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+}
+.scene-health-slot { display: none; }
+.village-scene .scene-heading {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+.village-scene .scene-heading > h2 { text-align: center; }
+
+/* Clicking the illustrated house or name reveals the person's full context. */
+.village-scene .island-main {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+.island-main:focus-visible {
+  outline: 3px solid #3d7880;
+  outline-offset: 5px;
+  border-radius: 24px;
+}
+.island-main .neighborhood-art { pointer-events: none; }
+.island-details-hint {
+  margin-top: .12rem;
+  color: #54716a;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  opacity: .8;
+}
+.island-details {
+  width: min(100%, 300px);
+  margin: .55rem auto 0;
+  padding: .75rem .9rem;
+  border: 1px solid rgba(70, 126, 127, .32);
+  border-radius: 18px 14px 20px 15px;
+  background: rgba(255, 251, 230, .84);
+  color: #354b42;
+  text-align: left;
+  box-shadow: 0 3px 8px rgba(45, 95, 87, .07);
+}
+.island-details dl { display: grid; gap: .55rem; margin: 0; }
+.island-details dl > div { display: grid; grid-template-columns: minmax(86px, .8fr) 1.2fr; gap: .55rem; align-items: start; }
+.island-details dt { color: #68796c; font-size: .74rem; font-weight: 700; }
+.island-details dd { min-width: 0; margin: 0; font-size: .82rem; line-height: 1.4; overflow-wrap: anywhere; }
+.island-location-detail dd { text-align: left; }
+.local-time-detail p { margin: 0; }
+.local-time-detail .local-time-line { justify-content: flex-start; flex-wrap: wrap; font-size: .8rem; text-align: left; }
+.contact-timing { margin-top: .18rem !important; color: #55794c; font-size: .76rem; font-weight: 700; }
+.village-scene .island { transition: min-height 180ms ease; }
+
+@media (max-width: 760px) {
+  .village-header { display: block; padding-top: .25rem; }
+  .header-brand-health { flex-direction: column; gap: .7rem; padding: 0 0 0 5rem; }
+  .brand-lockup .brand-title { font-size: clamp(2.7rem, 11vw, 4rem); }
+  .header-health-slot { width: min(100%, 440px); }
+  .header-health-slot .village-health { padding: .75rem .9rem; }
+  .header-health-slot .health-heading h2 { font-size: 1rem; }
+  .header-health-slot .health-caption { margin-top: .45rem; font-size: .78rem; }
+  .header-actions { top: .45rem; right: 0; transform: none; }
+  .header-actions .message-ideas-trigger > span:last-child { display: none; }
+  .header-actions .message-ideas-trigger { min-width: 60px; }
+  .village-scene .scene-heading { display: flex; }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .header-brand-health { gap: .8rem; padding: 0 6.8rem; }
+  .brand-lockup .brand-title { font-size: clamp(2.8rem, 5vw, 3.7rem); }
+  .header-health-slot { width: min(100%, 340px); }
+  .header-health-slot .village-health { padding: .75rem .85rem; }
+  .header-health-slot .health-heading h2 { font-size: 1rem; }
+  .header-health-slot .health-caption { margin-top: .45rem; font-size: .78rem; }
+}
+@media (max-width: 390px) {
+  .header-brand-health { padding-left: 0; padding-top: 4.6rem; }
+  .header-actions { top: 0; right: 50%; transform: translateX(50%); }
+}
+
+/* Header alignment requested: tracker at the left, wordmark centered. */
+.village-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+}
+.header-health-slot {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  width: min(100%, 440px);
+}
+.brand-lockup {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+}
+.brand-lockup .brand-title {
+  justify-content: center;
+  font-size: clamp(4.2rem, 6.8vw, 6.4rem);
+  text-align: center;
+}
+.header-actions {
+  position: static;
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  transform: none;
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .header-health-slot { width: min(100%, 300px); }
+  .header-brand-health { padding: 0; }
+  .brand-lockup .brand-title { font-size: clamp(3.2rem, 6vw, 4.3rem); }
+}
+@media (max-width: 760px) {
+  .village-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: .65rem;
+  }
+  .brand-lockup {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    justify-self: center;
+    padding-inline: 2.5rem;
+  }
+  .brand-lockup .brand-title { font-size: clamp(3.5rem, 12vw, 5rem); }
+  .header-health-slot {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: min(100%, 440px);
+    justify-self: start;
+  }
+  .header-actions {
+    position: absolute;
+    top: .25rem;
+    right: 0;
+    grid-column: 2;
+    grid-row: 1;
+    transform: none;
+  }
+}
+@media (max-width: 390px) {
+  .header-actions { top: 0; right: 50%; transform: translateX(50%); }
+  .brand-lockup { padding-top: 4.5rem; }
+}
+
+/* Leave clear water between island edges and the next neighborhood. */
+.village-scene .village {
+  row-gap: clamp(3rem, 5vw, 4.5rem);
+}
+@media (max-width: 699px) {
+  .village-scene .village { row-gap: 3.25rem; }
+  .village-scene .village > div:nth-child(odd),
+  .village-scene .village > div:nth-child(even) {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Painted countryside + lighter handwritten wordmark (iteration 2)
+------------------------------------------------------------------- */
+
+/* The landscape replaces the flat gradient and dot grid. */
+body { background: #fbf3e5; }
+.page { background: transparent; }
+.page::before { display: none; }
+.village-landscape {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  pointer-events: none;
+}
+.landscape-cloud { animation: cloud-drift 38s ease-in-out infinite alternate; }
+.landscape-cloud:nth-of-type(2n) { animation-duration: 52s; animation-direction: alternate-reverse; }
+@keyframes cloud-drift { from { translate: -18px 0; } to { translate: 18px 0; } }
+@media (prefers-reduced-motion: reduce) { .landscape-cloud { animation: none; } }
+
+/* Wordmark: lighter, handwritten, and the house letter keeps the spotlight. */
+.brand-title,
+.brand-lockup .brand-title {
+  display: block;
+  color: #2c4337;
+  font-family: var(--font-shantell), "Comic Sans MS", cursive;
+  font-weight: 450;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+.wordmark { display: inline-block; white-space: nowrap; }
+.wordmark-house {
+  display: inline-block;
+  vertical-align: baseline; /* the SVG's bottom edge sits on the text baseline */
+  overflow: visible;
+  margin: 0 0.015em;
+}
+.wordmark-house--h { width: 0.64em; height: 1em; }
+.wordmark-house--n { width: 0.64em; height: 0.84em; }
+
+/* Other headings follow the same softer hand. */
+.scene-heading h2,
+.drawer-heading h2,
+.person-name,
+.empty-village p,
+.birthday-heading h2 {
+  font-family: var(--font-shantell), "Comic Sans MS", cursive;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.scene-heading h2 { color: #2c4337; }
+
+/* Cards that float over the painting get a warm paper finish. */
+.header-health-slot .village-health,
+.birthday-section {
+  background: rgba(255, 250, 238, 0.9);
+  border-color: rgba(139, 154, 101, 0.45);
+}
+
+/* Neighborhood text: relationship, days, and a light status that never relies on color alone. */
+.village-scene .person-meta {
+  color: #3e5446;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.light-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+  padding: 0.2rem 0.75rem;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.light-status--glowing { border-color: #c9a03c; background: #ffe9a3; color: #4f3c0c; box-shadow: 0 0 14px rgba(255, 210, 100, 0.65); }
+.light-status--warm { border-color: #d8bb72; background: #fff3cf; color: #4f3c0c; }
+.light-status--dimming { border-style: dashed; border-color: #7d8580; background: #e6e7e0; color: #343d3a; }
+.light-status--dark { border-color: #232b3b; background: #34405a; color: #f6efd6; }
+
+/* Clearings: room at the bottom so the buttons always sit inside the edge. */
+.village-scene .village > div .island { padding: 0.6rem 1.7rem 2.1rem; }
+.village-scene .person-actions { margin-top: 0.6rem; }
+
+/* Header: Add / Message ideas buttons, then the user's own clock in the corner. */
+.header-actions {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+.header-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+.your-clock {
+  display: flex;
+  width: 116px;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+.your-clock-face { display: block; width: 104px; height: 104px; overflow: visible; }
+.your-clock-number {
+  fill: #2c4337;
+  font-family: var(--font-shantell), "Comic Sans MS", cursive;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.your-clock-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  color: #2c4337;
+  font-family: var(--font-shantell), "Comic Sans MS", cursive;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+.your-clock-place { color: #4d5f50; font-size: 0.74rem; font-weight: 600; }
+@media (max-width: 760px) {
+  .header-actions { gap: 0.5rem; }
+  .your-clock { width: 78px; }
+  .your-clock-face { width: 72px; height: 72px; }
+  .your-clock-time { font-size: 0.85rem; }
+  .your-clock-place { display: none; }
+}
+
+/* Clock text: time + zone, then the date, then (at night) the moon phase. */
+.your-clock-hour { display: inline-flex; align-items: baseline; gap: 0.3rem; white-space: nowrap; }
+.your-clock-zone {
+  color: #4d5f50;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}
+.your-clock-date { color: #3e5446; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+.your-clock-moon { color: #4d5f50; font-size: 0.7rem; font-weight: 600; }
+@media (max-width: 760px) {
+  .your-clock-zone, .your-clock-moon { display: none; }
+  .your-clock-date { font-size: 0.7rem; }
+}
+
+/* After dark the text that sits straight on the landscape turns light so it stays readable. */
+.brand-title, .scene-heading h2, .your-clock-time, .your-clock-zone, .your-clock-date, .your-clock-moon, .message-ideas-trigger {
+  transition: color 600ms ease;
+}
+:root[data-sky="night"] .brand-title,
+:root[data-sky="night"] .scene-heading h2,
+:root[data-sky="night"] .your-clock-time,
+:root[data-sky="night"] .your-clock-zone,
+:root[data-sky="night"] .your-clock-date,
+:root[data-sky="night"] .your-clock-moon,
+:root[data-sky="night"] .message-ideas-trigger {
+  color: #fbf3e5;
+  text-shadow: 0 1px 6px rgba(20, 26, 52, 0.6);
+}
+:root[data-sky="night"] .message-ideas-trigger:hover { background: rgba(255, 249, 232, 0.12); }
+@media (prefers-reduced-motion: reduce) {
+  .brand-title, .scene-heading h2, .your-clock-time { transition: none; }
+}
+
+/* Wordmark house colors. The outline uses the letter color (currentColor),
+   so the house always matches the word; fills swap so it contrasts with the sky. */
+.wordmark-house .wm-chimney { fill: #c76546; }
+.wordmark-house .wm-chimney-shade { fill: #a9503a; }
+.wordmark-house .wm-wall { fill: #9dbb6a; }
+.wordmark-house .wm-roof { fill: #2f4a3c; }
+.wordmark-house .wm-door { fill: #2c4337; }
+.wordmark-house .wm-glass,
+.wordmark-house .wm-knob { fill: #f6cf71; }
+.wordmark-house .wm-smoke { opacity: 0.65; }
+:root[data-sky="night"] .wordmark-house .wm-chimney { fill: #e58a6b; }
+:root[data-sky="night"] .wordmark-house .wm-chimney-shade { fill: #c76546; }
+:root[data-sky="night"] .wordmark-house .wm-wall { fill: #f6cf71; } /* a lit-up house at night */
+:root[data-sky="night"] .wordmark-house .wm-roof { fill: #e58a6b; }
+:root[data-sky="night"] .wordmark-house .wm-door { fill: #262d56; }
+:root[data-sky="night"] .wordmark-house .wm-glass,
+:root[data-sky="night"] .wordmark-house .wm-knob { fill: #ffe9a3; }
+:root[data-sky="night"] .wordmark-house .wm-smoke { opacity: 0.85; }
+.wordmark-house path { transition: fill 600ms ease; }
+
+/* Stronger halo behind light text at night, for text that sits over the hills. */
+:root[data-sky="night"] .brand-title,
+:root[data-sky="night"] .scene-heading h2 {
+  text-shadow: 0 0 2px rgba(20, 26, 52, 0.9), 0 0 10px rgba(20, 26, 52, 0.75), 0 2px 14px rgba(20, 26, 52, 0.6);
+}
+:root[data-sky="night"] .wordmark-house { filter: drop-shadow(0 0 6px rgba(20, 26, 52, 0.7)); }
+@media (prefers-reduced-motion: reduce) { .wordmark-house path { transition: none; } }
+
+/* In daylight, a soft paper halo keeps dark text crisp if the sun passes behind it. */
+:root:not([data-sky="night"]) .brand-title,
+:root:not([data-sky="night"]) .scene-heading h2 {
+  text-shadow: 0 0 2px rgba(251, 243, 229, 0.95), 0 0 10px rgba(251, 243, 229, 0.8);
+}
+
+/* Sun and moon get their own layer between the sky and the hills.
+   On narrow screens the header fills the sky, so they're hidden there. */
+.sky-bodies { overflow: visible; }
+@media (max-width: 760px) { .sky-bodies { display: none; } }
+
+/* Add person + Message ideas float in the bottom-right corner. */
+.corner-actions {
+  position: fixed;
+  z-index: 15;
+  right: clamp(1rem, 2.5vw, 2rem);
+  bottom: clamp(1rem, 2.5vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+.corner-actions .add-person-trigger,
+.corner-actions .message-ideas-icon {
+  box-shadow: 0 4px 0 rgba(105, 84, 43, 0.18), 0 10px 22px rgba(30, 38, 60, 0.22);
+}
+/* the label sits on a little paper tag so it's readable over any part of the landscape */
+.corner-actions .message-ideas-trigger > span:last-child {
+  padding: 0.15rem 0.6rem;
+  border: 1.5px solid #b18b3d;
+  border-radius: 999px;
+  background: #fff9e8;
+  color: #2c4337;
+  text-shadow: none;
+}
+:root[data-sky="night"] .corner-actions .message-ideas-trigger { color: #2c4337; text-shadow: none; }
+/* leave room so the last neighborhoods can scroll clear of the corner buttons */
+.page-content { padding-bottom: 12rem; }
+@media (max-width: 760px) {
+  .corner-actions .add-person-trigger { width: 58px; height: 58px; flex-basis: 58px; }
+  .corner-actions .message-ideas-icon { width: 58px; height: 58px; }
+}
+
+/* Village glow tracker: a lantern jar + words, no box, straight on the landscape. */
+.header-health-slot .village-health.village-health--lantern {
+  display: flex;
+  width: auto;
+  align-items: center;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.health-lantern { flex: 0 0 auto; }
+.health-lantern svg { display: block; width: 74px; height: 160px; overflow: visible; }
+.health-words { display: flex; max-width: 15rem; flex-direction: column; gap: 0.2rem; }
+.village-health--lantern .health-words h2 {
+  margin: 0;
+  color: #2c4337;
+  font-family: var(--font-shantell), "Comic Sans MS", cursive;
+  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.village-health--lantern .health-percent {
+  margin: 0;
+  color: #2c4337;
+  font-family: var(--font-shantell), "Comic Sans MS", cursive;
+  font-size: clamp(2rem, 3.2vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1;
+}
+.village-health--lantern .health-percent span { margin-left: 0.15rem; font-size: 0.42em; font-weight: 600; }
+.village-health--lantern .health-caption {
+  margin: 0.15rem 0 0;
+  color: #3e5446;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+/* text halos: paper by day, dusk-blue at night, so it reads over hills, clouds or sky */
+.village-health--lantern .health-words > * {
+  text-shadow: 0 0 2px rgba(251, 243, 229, 0.95), 0 0 10px rgba(251, 243, 229, 0.85);
+  transition: color 600ms ease;
+}
+:root[data-sky="night"] .village-health--lantern .health-words > * {
+  color: #fbf3e5;
+  text-shadow: 0 0 2px rgba(20, 26, 52, 0.9), 0 0 10px rgba(20, 26, 52, 0.75);
+}
+@media (max-width: 760px) {
+  .health-lantern svg { width: 52px; height: 112px; }
+  .village-health--lantern .health-percent { font-size: 1.7rem; }
+  .village-health--lantern .health-caption { font-size: 0.75rem; }
+}
+
+/* Birthday picker: cake + Month + Day (no year, any date). */
+.birthday-picker { min-width: 0; margin: 0; padding: 0; border: 0; }
+.birthday-picker legend {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+  padding: 0;
+  color: #44564a;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+.birthday-picker-cake { width: 26px; height: 26px; }
+.birthday-picker-optional { color: #6b7a6c; font-weight: 500; }
+.birthday-picker-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 0.6rem; }
+.birthday-picker-row label { display: flex; flex-direction: column; gap: 0.25rem; color: #526258; font-size: 0.8rem; font-weight: 600; }
+.birthday-picker-row .field { width: 100%; min-height: 44px; border-radius: 14px; }
+.birthday-picker-row .field:disabled { opacity: 0.55; }
+
+/* Editing someone inside their neighborhood. */
+.island-details { width: min(100%, 320px); }
+.island-edit-button {
+  display: inline-flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 0.8rem;
+  border: 1.5px solid #b18b3d;
+  border-radius: 999px;
+  background: #fff4d2;
+  color: #2c4337;
+  font-weight: 700;
+}
+.island-edit-button svg { width: 20px; height: 20px; }
+.island-edit-button:hover { background: #ffeab0; }
+.edit-person-form { display: flex; flex-direction: column; gap: 0.7rem; text-align: left; }
+.edit-person-form > label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: #44564a;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.edit-person-form .field { width: 100%; min-height: 44px; border-radius: 14px; font-size: 0.95rem; }
+.edit-person-form .birthday-picker legend { font-size: 0.82rem; font-weight: 700; }
+.edit-person-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.2rem; }
+.edit-person-actions .btn { min-height: 44px; }
+.local-time-place { margin: 0; color: #355b61; font-size: 0.82rem; font-weight: 600; line-height: 1.35; }
+
+/* Birthday reminders on the neighborhood. */
+.birthday-corner {
+  position: absolute;
+  z-index: 3;
+  top: 0.2rem;
+  right: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  pointer-events: none;
+  transform: rotate(4deg);
+}
+.birthday-cake { width: 66px; height: 70px; overflow: visible; filter: drop-shadow(0 3px 0 rgba(44, 67, 55, 0.18)); }
+.birthday-tag {
+  padding: 0.12rem 0.6rem;
+  border: 2px solid #2c4337;
+  border-radius: 999px;
+  background: #ff9fc4;
+  color: #2c4337;
+  font-family: var(--font-shantell), "Comic Sans MS", cursive;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.birthday-corner--today .birthday-tag { background: #ffd23f; }
+.birthday-flames { animation: flame-flicker 1.4s ease-in-out infinite alternate; transform-origin: 40px 16px; }
+@keyframes flame-flicker { from { opacity: 0.85; transform: scaleY(0.94); } to { opacity: 1; transform: scaleY(1.06); } }
+.birthday-lights {
+  position: absolute;
+  z-index: 2;
+  top: 0.4rem;
+  left: 7%;
+  width: 86%;
+  height: 52px;
+  overflow: visible;
+  pointer-events: none;
+}
+.birthday-bulb { animation: bulb-twinkle 2.2s ease-in-out infinite; }
+@keyframes bulb-twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+.island--birthday .island-shell { filter: drop-shadow(0 0 18px rgba(255, 210, 63, 0.55)) !important; }
+@media (prefers-reduced-motion: reduce) {
+  .birthday-flames, .birthday-bulb { animation: none; }
+}
+/* (these sit inside the island, so they need to beat the island's "everything is relative" rule) */
+.village-scene .village > div .island > .birthday-corner,
+.village-scene .village > div .island > .birthday-lights { position: absolute; }
+.village-scene .village > div .island > .birthday-corner { z-index: 3; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Smaller Edit button: just "Edit" with a pencil. */
+.island-edit-button {
+  display: flex;
+  width: auto;
+  min-height: 34px;
+  margin: 0.7rem auto 0;
+  padding: 0.25rem 0.85rem;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+}
+.island-edit-button svg { width: 16px; height: 16px; }
+
+/* Hand-drawn feel for buttons: dark ink outline, slightly uneven corners,
+   and a little "printed" offset shadow, to match the illustrations. */
+.btn-primary,
+.village-scene .person-actions .btn-primary {
+  border: 2px solid #2c4337;
+  border-radius: 26px 20px 24px 18px / 20px 26px 18px 24px;
+  background: #f9cf5f;
+  color: #2c4337;
+  box-shadow: 2px 3px 0 #2c4337;
+}
+.btn-primary:hover { background: #ffd970; transform: translateY(-1px) rotate(-0.6deg); }
+.btn-primary:active { box-shadow: 1px 1px 0 #2c4337; transform: translate(1px, 2px); }
+.island-remove-button { border: 2px solid #2c4337; box-shadow: 1px 2px 0 #2c4337; }
+.corner-actions .add-person-trigger,
+.corner-actions .message-ideas-icon {
+  border: 2px solid #2c4337;
+  border-radius: 48% 52% 50% 50% / 52% 48% 52% 48%;
+  background: #f9cf5f;
+  box-shadow: 2px 3px 0 #2c4337, 0 10px 22px rgba(30, 38, 60, 0.2);
+}
+.corner-actions .message-ideas-trigger > span:last-child { border: 2px solid #2c4337; }
+.light-status, .birthday-tag { border-radius: 999px 900px 999px 940px; }
+
+/* Glow tracker text: number first, then a short status, then the week's count.
+   One font, tight spacing, short lines. */
+.village-health--lantern { gap: 0.85rem; }
+.health-words { max-width: 13rem; gap: 0; }
+.village-health--lantern .health-eyebrow {
+  margin: 0;
+  color: #3e5446;
+  font-family: var(--font-shantell), "Comic Sans MS", cursive;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.village-health--lantern .health-percent {
+  margin: 0.05rem 0 0.1rem;
+  font-size: clamp(2.4rem, 3.6vw, 3rem);
+  line-height: 0.95;
+  white-space: nowrap;
+}
+.village-health--lantern .health-percent span { margin-left: 0.05rem; font-size: 0.55em; font-weight: 700; }
+.village-health--lantern .health-words h2 { font-size: clamp(1rem, 1.4vw, 1.15rem); line-height: 1.2; }
+.village-health--lantern .health-caption {
+  margin-top: 0.3rem;
+  font-family: var(--font-shantell), "Comic Sans MS", cursive;
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+/* Birthday messages section in the Message ideas drawer (plain drawer style). */
+.birthday-ideas {
+  margin: 0 0 1.4rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid #d8d2bd;
+  border-radius: 18px 14px 20px 15px;
+  background: #fff4f2;
+}
+.birthday-ideas h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.5rem;
+  color: #34483c;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.birthday-ideas h3 svg { width: 24px; height: 24px; }
+.birthday-ideas ul { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.birthday-ideas li { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+.birthday-ideas-who { display: flex; flex-direction: column; color: #34483c; line-height: 1.3; }
+.birthday-ideas-who span { color: #59685c; font-size: 0.85rem; }
+.birthday-ideas-empty { margin: 0; color: #59685c; font-size: 0.9rem; line-height: 1.45; }
+
+/* Corner buttons, hand-drawn: the painted disc is an SVG, so the button itself is see-through. */
+.sketch-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.sketch-button-art { display: block; width: 80px; height: 80px; overflow: visible; transition: transform 160ms ease; }
+.sketch-button:hover .sketch-button-art { transform: translateY(-2px) rotate(-4deg); }
+.sketch-button:active .sketch-button-art { transform: translate(2px, 3px); }
+.sketch-button:focus-visible { outline: none; }
+.sketch-button:focus-visible .sketch-button-art { outline: 3px solid #2f6f73; outline-offset: 3px; border-radius: 50%; }
+/* the label is a small paper tag with a hand-drawn edge */
+.sketch-tag {
+  position: relative;
+  padding: 0.2rem 0.75rem 0.25rem;
+  color: #2c4337;
+  font-family: var(--font-shantell), "Comic Sans MS", cursive;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  isolation: isolate;
+}
+.sketch-tag::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border: 2px solid #2c4337;
+  border-radius: 14px 18px 12px 16px / 16px 12px 18px 14px;
+  background: #fff4dc;
+  box-shadow: 2px 2px 0 #2c4337;
+  content: "";
+  filter: url(#kl-wobble);
+  transform: rotate(-2deg);
+}
+@media (max-width: 760px) {
+  .sketch-button-art { width: 64px; height: 64px; }
+}
+@media (prefers-reduced-motion: reduce) { .sketch-button-art { transition: none; } }
+
+/* Add person + Message ideas: a row centered under the logo, with room to breathe. */
+.village-actions {
+  display: flex;
+  justify-content: center;
+  gap: clamp(2rem, 5vw, 3.5rem);
+  margin-top: 1rem;
+}
+.village-actions .sketch-button-art { width: 70px; height: 70px; }
+.village-actions .sketch-tag { margin-top: 0.15rem; font-size: 0.82rem; }
+.brand-lockup { display: flex; flex-direction: column; align-items: center; }
+@media (max-width: 760px) {
+  .village-actions { gap: 1.75rem; margin-top: 0.6rem; }
+  .village-actions .sketch-button-art { width: 58px; height: 58px; }
+}
+
+/* "Your village" and the neighborhoods sit a little lower, clear of the header. */
+.village-scene { margin-top: 2.25rem; }
+.village-scene .scene-heading { margin-bottom: 1.5rem; }
+
+/* Spacing that holds up however many neighborhoods there are:
+   neighborhoods are nudged up/down for a playful layout, so leave room for
+   that nudge between rows and before the "Coming up" section. */
+.village-scene .village {
+  row-gap: clamp(3.5rem, 6vw, 5rem);
+  padding-bottom: 3.5rem;
+}
+.village-supporting { margin-top: 2.5rem; }
+/* the corner buttons moved up, so the page no longer needs extra bottom room */
+.page-content { padding-bottom: 5rem; }
+
+/* Header alignment: glow jar | logo + buttons | clock.
+   The middle column is sized to the logo so it's truly centered, the two side
+   columns are equal, and all three groups share the same vertical center line. */
+@media (min-width: 761px) {
+  .village-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: clamp(1.5rem, 3vw, 3rem);
+  }
+  .header-health-slot { grid-column: 1; grid-row: 1; justify-self: start; align-self: center; width: auto; }
+  .brand-lockup { grid-column: 2; grid-row: 1; justify-self: center; align-self: center; }
+  .header-actions {
+    position: static;
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+    transform: none;
+  }
+}
+/* the jar and its words are centered on each other, and the status fits on one line */
+.village-health--lantern { align-items: center; }
+.health-words { max-width: 17rem; }
+/* both buttons get the same width, so their circles sit evenly under the logo */
+.village-actions .sketch-button { width: 9.5rem; }
+@media (max-width: 760px) {
+  .village-actions .sketch-button { width: 7.5rem; }
+}
+
+/* Slightly bigger logo, buttons a little closer together. */
+@media (min-width: 761px) {
+  .brand-lockup .brand-title { font-size: clamp(4.8rem, 7.6vw, 7.2rem); }
+}
+.village-actions { gap: clamp(0.75rem, 2vw, 1.5rem); }
+
+/* "Checked in!" confirmation: a little tag under the buttons, shown for ~4 seconds. */
+.check-in-toast-slot { display: flex; justify-content: center; min-height: 0; }
+.check-in-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+  padding: 0.35rem 1rem;
+  border: 2px solid #2c4337;
+  border-radius: 999px 900px 999px 940px;
+  background: #dff2ea;
+  color: #2c4337;
+  font-family: var(--font-shantell), "Comic Sans MS", cursive;
+  font-size: 0.98rem;
+  font-weight: 700;
+  box-shadow: 2px 2px 0 #2c4337;
+  animation: toast-in 260ms ease-out both;
+}
+@keyframes toast-in { from { opacity: 0; transform: translateY(6px) scale(0.96); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .check-in-toast { animation: none; } }
